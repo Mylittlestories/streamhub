@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <title>StreamHub Pro — Universal Streaming & Torrent Dashboard</title>
-  <meta name="description" content="Unified free streaming & torrent dashboard for PC, Android Phone, and Android TV. Torrentio, YTS/YIFY, EZTV, Comet, and Free Legal Platforms in one place.">
+  <title>StreamHub Pro — Universal Streaming &amp; Torrent Dashboard</title>
+  <meta name="description" content="Unified streaming hub with embedded Stremio/Kodi-style player. Torrentio, YTS, EZTV, Comet, and Free Legal Platforms on PC, Android Phone, and Android TV.">
   <meta name="theme-color" content="#090b10">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -18,6 +18,10 @@
   
   <!-- Stylesheet -->
   <link rel="stylesheet" href="style.css">
+
+  <!-- Embedded Streaming Engines (Local bundle for GitHub Pages) -->
+  <script src="libs/hls.min.js"></script>
+  <script src="libs/webtorrent.min.js"></script>
 </head>
 <body class="theme-midnight">
 
@@ -25,7 +29,7 @@
   <aside id="tvBanner" class="tv-banner" style="display:none;" aria-live="polite">
     <div class="tv-banner-content">
       <span class="tv-icon">🎮</span>
-      <span class="tv-text"><strong>TV Mode Active:</strong> Use D-Pad / Arrow keys to navigate, OK/Enter to select, Back/Esc to return</span>
+      <span class="tv-text"><strong>TV Mode Active:</strong> Use D-Pad / Arrow keys to navigate, OK/Enter to select, Back/Esc to return, T to toggle</span>
       <button class="btn btn-sm btn-outline" id="tvExitBtn" tabindex="0">Exit TV Mode</button>
     </div>
   </aside>
@@ -58,7 +62,7 @@
       <button id="tvToggleBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Toggle 10-Foot TV Mode (Hotkey: T)">
         <span class="btn-emoji">📺</span><span class="btn-label">TV Mode</span>
       </button>
-      <button id="settingsOpenBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Settings & Addon Config">
+      <button id="settingsOpenBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Settings &amp; Addon Config">
         <span class="btn-emoji">⚙️</span><span class="btn-label">Settings</span>
       </button>
     </div>
@@ -115,7 +119,7 @@
           <div class="hero-content">
             <div class="greeting-badge" id="greetingTime">Welcome back</div>
             <h1 class="greeting-title" id="greetingTitle">Welcome to StreamHub Pro</h1>
-            <p class="hero-desc">Your all-in-one entertainment station for Torrentio, YIFY/YTS, EZTV, Comet, and 100% Free Legal Streaming. Optimized for PC, Android, and Smart TV.</p>
+            <p class="hero-desc">Your embedded cinema media center for Torrentio, YIFY/YTS, EZTV, Comet, and 100% Free Legal Streaming. Works seamlessly on PC, Android Phone, and Android TV.</p>
             <div class="hero-actions">
               <button class="btn btn-accent" id="heroSearchAction" tabindex="0">🔍 Search Movies &amp; Shows</button>
               <button class="btn btn-secondary" id="heroTvAction" tabindex="0">📺 Switch to TV Mode</button>
@@ -145,12 +149,12 @@
             <h2>▶️ Continue Watching</h2>
             <p class="section-sub">Resume your active series and movies right where you left off.</p>
           </div>
-          <button class="btn btn-sm btn-outline" id="manageContinueBtn" tabindex="0">View All</button>
+          <button class="btn btn-sm btn-outline" id="manageContinueBtn" tabindex="0">View Watchlist</button>
         </div>
         <div class="rail" id="homeContinue"></div>
         <div class="empty-state" id="homeContinueEmpty" style="display:none">
           <div class="empty-icon">🍿</div>
-          <div class="empty-text">No active titles. Add movies or shows to your Watchlist and mark them "Watching".</div>
+          <div class="empty-text">No active titles. Add movies or shows to your Watchlist and start streaming!</div>
         </div>
 
         <!-- Pinned Bookmarks -->
@@ -185,7 +189,7 @@
         <!-- Search Input Bar with Filter Options -->
         <div class="search-engine-box">
           <div class="search-bar-extended">
-            <input id="streamSearchInput" type="search" placeholder="Type movie title, TV show, anime, or IMDb ID (e.g. tt1375666, Inception, Dune, Breaking Bad)…" tabindex="0">
+            <input id="streamSearchInput" type="search" placeholder="Type movie title, TV show, anime, or IMDb ID (e.g. Inception, Dune, Breaking Bad, tt1375666)…" tabindex="0">
             <button id="streamSearchBtn" class="btn btn-accent btn-large" tabindex="0">🔎 Find Streams</button>
           </div>
           
@@ -228,13 +232,13 @@
           <div class="card-inner-flex">
             <div class="magnet-icon">🧲</div>
             <div class="magnet-content">
-              <h3>Direct Magnet / Video URL Launcher</h3>
-              <p>Paste any Magnet URI (`magnet:?xt=...`), Torrent InfoHash, or direct MP4/HLS link to play in web player or launch in Stremio/VLC.</p>
+              <h3>Direct Magnet / Video URL Embedded Player</h3>
+              <p>Paste any Magnet URI (`magnet:?xt=...`), Torrent InfoHash, or direct MP4/HLS link to stream instantly in our embedded Kodi/Stremio player.</p>
               <div class="magnet-input-row">
-                <input id="directMagnetInput" type="text" placeholder="magnet:?xt=urn:btih:... or https://...video.mp4" tabindex="0">
-                <button id="directMagnetPlayBtn" class="btn btn-accent" tabindex="0">▶️ Play in Web Player</button>
+                <input id="directMagnetInput" type="text" placeholder="magnet:?xt=urn:btih:... or https://...video.mp4 or .m3u8" tabindex="0">
+                <button id="directMagnetPlayBtn" class="btn btn-accent" tabindex="0">▶️ Play in Embedded Player</button>
                 <button id="directMagnetStremioBtn" class="btn btn-secondary" tabindex="0">🚀 Stremio</button>
-                <button id="directMagnetExternalBtn" class="btn btn-outline" tabindex="0">🧲 Open Torrent App</button>
+                <button id="directMagnetExternalBtn" class="btn btn-outline" tabindex="0">🧲 Torrent App</button>
               </div>
             </div>
           </div>
@@ -598,11 +602,11 @@
             <div class="form-group">
               <label for="settingTheme">Color Theme:</label>
               <select id="settingTheme" tabindex="0">
-                <option value="theme-midnight">Midnight Cinema (Deep Blue & Violet)</option>
+                <option value="theme-midnight">Midnight Cinema (Deep Blue &amp; Violet)</option>
                 <option value="theme-oled">OLED Pure Black (High Contrast)</option>
-                <option value="theme-cyberpunk">Cyberpunk Neon (Purple & Cyan)</option>
-                <option value="theme-emerald">Emerald Matrix (Dark Green & Slate)</option>
-                <option value="theme-crimson">Crimson Luxe (Red & Charcoal)</option>
+                <option value="theme-cyberpunk">Cyberpunk Neon (Purple &amp; Cyan)</option>
+                <option value="theme-emerald">Emerald Matrix (Dark Green &amp; Slate)</option>
+                <option value="theme-crimson">Crimson Luxe (Red &amp; Charcoal)</option>
               </select>
             </div>
 
@@ -613,11 +617,11 @@
             </div>
 
             <div class="form-group">
-              <label for="settingDefaultPlayer">Default Stream Player:</label>
+              <label for="settingDefaultPlayer">Default Stream Action:</label>
               <select id="settingDefaultPlayer" tabindex="0">
-                <option value="webplayer">In-App Web Player</option>
-                <option value="stremio">Stremio (App / Web)</option>
-                <option value="magnet">Magnet Torrent App (qBittorrent / Flud)</option>
+                <option value="embedded">Embedded Kodi/Stremio Player</option>
+                <option value="stremio">External Stremio App</option>
+                <option value="magnet">External Torrent Client</option>
                 <option value="vlc">VLC Media Player</option>
               </select>
             </div>
@@ -655,40 +659,214 @@
   </div>
 
   <!-- ========================================== -->
-  <!-- MODAL 2: IN-APP WEB VIDEO PLAYER           -->
+  <!-- EMBEDDED KODI / STREMIO STYLE CINEMA PLAYER -->
   <!-- ========================================== -->
-  <div id="playerModal" class="modal-backdrop modal-player-backdrop" style="display:none;" role="dialog" aria-modal="true">
-    <div class="modal-player-dialog">
-      <div class="player-header">
-        <div class="player-title" id="playerTitle">StreamHub Player</div>
-        <div class="player-header-actions">
-          <button class="btn btn-sm btn-outline" id="playerStremioBtn" tabindex="0" title="Switch to Stremio">🚀 Open in Stremio</button>
-          <button class="btn btn-sm btn-outline" id="playerExternalBtn" tabindex="0" title="Open Magnet">🧲 Magnet</button>
-          <button class="modal-close" id="playerModalClose" aria-label="Close player" tabindex="0">✕</button>
-        </div>
-      </div>
+  <div id="cinemaPlayer" class="cinema-player-overlay" style="display:none;" tabindex="-1" role="dialog" aria-label="Embedded Cinema Player">
+    
+    <!-- Video Surface -->
+    <div class="cinema-video-surface" id="cinemaVideoSurface">
+      <video id="kodiPlayerVideo" playsinline crossorigin="anonymous" tabindex="0"></video>
       
-      <div class="player-video-container">
-        <video id="mainVideoPlayer" controls playsinline crossorigin="anonymous" tabindex="0"></video>
-        <div id="playerNotice" class="player-notice" style="display:none;">
-          <div class="notice-icon">📡</div>
-          <h4 id="playerNoticeTitle">Direct Stream / P2P Streaming</h4>
-          <p id="playerNoticeDesc">Connecting to stream sources…</p>
-          <div class="notice-buttons" id="playerNoticeButtons"></div>
-        </div>
+      <!-- Custom Subtitle Overlay -->
+      <div id="cinemaSubtitleBox" class="cinema-subtitle-box" style="display:none;"></div>
+      
+      <!-- Center Action Indicator (Play/Pause/Seek flash) -->
+      <div id="cinemaCenterIndicator" class="cinema-center-indicator" style="display:none;">
+        <span id="cinemaCenterIcon">▶️</span>
       </div>
 
-      <div class="player-controls-bar">
-        <div class="player-controls-left">
-          <span class="stream-badge" id="playerStreamQuality">HD Stream</span>
-          <span class="stream-info" id="playerStreamInfo"></span>
+      <!-- P2P Torrent Streaming Stats Badge -->
+      <div id="cinemaTorrentBadge" class="cinema-torrent-badge" style="display:none;">
+        <span class="p2p-dot"></span>
+        <span id="cinemaP2pText">P2P Streaming: Connecting peers…</span>
+      </div>
+
+      <!-- TV Up-Next Episode Binge Card -->
+      <div id="cinemaUpNextCard" class="cinema-upnext-card" style="display:none;">
+        <div class="upnext-header">
+          <span>UP NEXT in <strong id="upNextCountdown">10</strong>s</span>
+          <button class="upnext-cancel" id="upNextCancelBtn" tabindex="0">✕</button>
         </div>
-        <div class="player-controls-right">
-          <button class="btn btn-sm btn-outline" id="playerCopyUrlBtn" tabindex="0">📋 Copy Stream URL</button>
-          <button class="btn btn-sm btn-outline" id="playerVlcBtn" tabindex="0">📺 Open VLC</button>
+        <div class="upnext-body">
+          <div class="upnext-title" id="upNextTitle">Next Episode</div>
+          <button class="btn btn-accent btn-sm" id="upNextPlayBtn" tabindex="0">▶️ Play Now</button>
         </div>
       </div>
     </div>
+
+    <!-- On-Screen Display (OSD Controls) -->
+    <div class="cinema-osd" id="cinemaOsd">
+      
+      <!-- Top OSD Bar -->
+      <div class="cinema-osd-top">
+        <div class="osd-top-left">
+          <button class="osd-btn" id="cinemaCloseBtn" tabindex="0" title="Back / Exit (Esc)">
+            <span class="osd-icon">✕</span>
+          </button>
+          <div class="osd-media-info">
+            <div class="osd-title" id="cinemaMediaTitle">Now Playing</div>
+            <div class="osd-meta" id="cinemaMediaMeta">1080p • Stereo • 2024</div>
+          </div>
+        </div>
+
+        <div class="osd-top-right">
+          <span class="osd-badge" id="cinemaQualityBadge">4K UHD</span>
+          <button class="osd-btn" id="cinemaAspectBtn" tabindex="0" title="Aspect Ratio Mode">
+            <span class="osd-icon">↔️</span>
+          </button>
+          <button class="osd-btn" id="cinemaPipBtn" tabindex="0" title="Picture-in-Picture">
+            <span class="osd-icon">🗗</span>
+          </button>
+          <button class="osd-btn" id="cinemaExternalStremioBtn" tabindex="0" title="Launch in Stremio">
+            <span class="osd-icon">🚀</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Middle Feedback Toast Banner -->
+      <div id="cinemaOsdToast" class="cinema-osd-toast" style="display:none;">
+        <span id="cinemaOsdToastText">Volume: 100%</span>
+      </div>
+
+      <!-- Bottom OSD Bar -->
+      <div class="cinema-osd-bottom">
+        <!-- Scrubbable Timeline -->
+        <div class="cinema-timeline-container" id="cinemaTimelineContainer">
+          <div class="cinema-timeline-buffered" id="cinemaTimelineBuffered"></div>
+          <div class="cinema-timeline-played" id="cinemaTimelinePlayed">
+            <div class="cinema-timeline-handle"></div>
+          </div>
+          <div id="cinemaTimelineHover" class="cinema-timeline-hover" style="display:none;">00:00</div>
+        </div>
+
+        <!-- Controls Row -->
+        <div class="cinema-controls-row">
+          <div class="controls-group-left">
+            <button class="osd-control-btn" id="cinemaPlayPauseBtn" tabindex="0" title="Play / Pause (Space)">
+              <span id="cinemaPlayPauseIcon">⏸️</span>
+            </button>
+            <button class="osd-control-btn" id="cinemaSeekBackBtn" tabindex="0" title="Seek -10s (←)">
+              <span>⏪ 10s</span>
+            </button>
+            <button class="osd-control-btn" id="cinemaSeekFwdBtn" tabindex="0" title="Seek +10s (→)">
+              <span>10s ⏩</span>
+            </button>
+            <button class="osd-control-btn" id="cinemaNextEpBtn" tabindex="0" title="Next Episode (N)" style="display:none;">
+              <span>⏭️ Next Ep</span>
+            </button>
+            
+            <!-- Volume Control -->
+            <div class="cinema-volume-box">
+              <button class="osd-control-btn" id="cinemaMuteBtn" tabindex="0" title="Mute (M)">
+                <span id="cinemaVolumeIcon">🔊</span>
+              </button>
+              <input type="range" id="cinemaVolumeSlider" min="0" max="1" step="0.05" value="1" tabindex="0" class="cinema-volume-slider">
+            </div>
+
+            <!-- Time Display -->
+            <div class="cinema-time-display">
+              <span id="cinemaCurrentTime">00:00</span> / <span id="cinemaDuration">00:00</span>
+              <span class="cinema-time-remaining" id="cinemaRemaining">(-00:00)</span>
+            </div>
+          </div>
+
+          <div class="controls-group-right">
+            <!-- Source / Quality Switcher -->
+            <button class="osd-control-btn" id="cinemaSourceBtn" tabindex="0" title="Switch Stream Source">
+              <span>⚡ Stream Sources</span>
+            </button>
+            
+            <!-- Subtitles Menu -->
+            <button class="osd-control-btn" id="cinemaSubtitlesBtn" tabindex="0" title="Subtitles (C)">
+              <span>💬 Subtitles</span>
+            </button>
+
+            <!-- Audio Boost / Track Menu -->
+            <button class="osd-control-btn" id="cinemaAudioBtn" tabindex="0" title="Audio Boost / Track">
+              <span>🎧 Audio</span>
+            </button>
+
+            <!-- Playback Speed -->
+            <button class="osd-control-btn" id="cinemaSpeedBtn" tabindex="0" title="Speed">
+              <span id="cinemaSpeedText">1.0x</span>
+            </button>
+
+            <!-- Fullscreen -->
+            <button class="osd-control-btn" id="cinemaFullscreenBtn" tabindex="0" title="Fullscreen (F)">
+              <span id="cinemaFullscreenIcon">⛶</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Dropdown Panel: Stream Sources Switcher -->
+    <div id="cinemaSourceDropdown" class="cinema-dropdown-panel" style="display:none;">
+      <div class="dropdown-header">
+        <span>⚡ Switch Stream / Addon Source</span>
+        <button class="dropdown-close" onclick="document.getElementById('cinemaSourceDropdown').style.display='none'">✕</button>
+      </div>
+      <div class="dropdown-body" id="cinemaSourceList">
+        <!-- Dynamically injected available streams -->
+      </div>
+    </div>
+
+    <!-- Dropdown Panel: Subtitles Settings -->
+    <div id="cinemaSubtitlesDropdown" class="cinema-dropdown-panel" style="display:none;">
+      <div class="dropdown-header">
+        <span>💬 Subtitles &amp; Captions</span>
+        <button class="dropdown-close" onclick="document.getElementById('cinemaSubtitlesDropdown').style.display='none'">✕</button>
+      </div>
+      <div class="dropdown-body">
+        <div class="dropdown-row">
+          <label class="checkbox-label">
+            <input type="checkbox" id="subtitlesToggle"> Enable Subtitles
+          </label>
+        </div>
+        <div class="dropdown-row">
+          <label>Subtitle Track:</label>
+          <select id="subtitleTrackSelect" class="form-control" tabindex="0">
+            <option value="none">None</option>
+            <option value="en" selected>English (Generated / Auto)</option>
+            <option value="es">Spanish</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="el">Greek</option>
+          </select>
+        </div>
+        <div class="dropdown-row">
+          <label>Subtitle Sync Delay:</label>
+          <div class="btn-group">
+            <button class="btn btn-sm btn-outline" id="subDelayMinusBtn" tabindex="0">-0.5s</button>
+            <span id="subDelayText" style="padding: 4px 8px; font-weight:700;">0.0s</span>
+            <button class="btn btn-sm btn-outline" id="subDelayPlusBtn" tabindex="0">+0.5s</button>
+          </div>
+        </div>
+        <div class="dropdown-row">
+          <label>Load Custom Subtitles (.srt / .vtt):</label>
+          <input type="file" id="customSubFileInput" accept=".srt,.vtt" tabindex="0">
+        </div>
+      </div>
+    </div>
+
+    <!-- Dropdown Panel: Audio Track & Night Boost -->
+    <div id="cinemaAudioDropdown" class="cinema-dropdown-panel" style="display:none;">
+      <div class="dropdown-header">
+        <span>🎧 Audio Settings &amp; Boost</span>
+        <button class="dropdown-close" onclick="document.getElementById('cinemaAudioDropdown').style.display='none'">✕</button>
+      </div>
+      <div class="dropdown-body">
+        <div class="dropdown-row">
+          <label>Audio Mode:</label>
+          <select id="audioModeSelect" tabindex="0">
+            <option value="standard">Standard Stereo / 5.1</option>
+            <option value="boost">Dialogue Boost (+150% Volume)</option>
+            <option value="night">Night Mode (Compressed Dynamic Range)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
   </div>
 
   <!-- ========================================== -->

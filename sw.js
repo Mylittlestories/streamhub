@@ -1,11 +1,13 @@
-// StreamHub Pro Service Worker
-const CACHE_NAME = 'streamhub-pro-v1.1';
+// StreamHub Pro Service Worker with Embedded Player Support
+const CACHE_NAME = 'streamhub-pro-v2.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './style.css',
   './app.js',
   './manifest.webmanifest',
+  './libs/hls.min.js',
+  './libs/webtorrent.min.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/logo.svg',
@@ -36,11 +38,11 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch Event - Cache first with network fallback for assets, Network first for dynamic API calls
+// Fetch Event - Cache first with network fallback for assets, Network first for dynamic video/stream calls
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // For API / stream calls or external video, always use network directly
+  // Exclude external video streams, magnet chunks, or third party APIs from static cache
   if (url.origin !== self.location.origin || event.request.method !== 'GET') {
     return;
   }
@@ -48,7 +50,6 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     caches.match(event.request).then((cachedResponse) => {
       if (cachedResponse) {
-        // Fetch in background to update cache
         fetch(event.request).then((networkResponse) => {
           if (networkResponse && networkResponse.status === 200) {
             caches.open(CACHE_NAME).then((cache) => cache.put(event.request, networkResponse));
@@ -58,7 +59,6 @@ self.addEventListener('fetch', (event) => {
       }
 
       return fetch(event.request).catch(() => {
-        // Fallback for HTML navigation
         if (event.request.mode === 'navigate') {
           return caches.match('./index.html');
         }
