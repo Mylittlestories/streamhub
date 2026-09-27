@@ -2497,3 +2497,321 @@ input:focus, select:focus, textarea:focus {
     color: #000000 !important;
   }
 }
+
+/* ==========================================================================
+   ENHANCED STREAMHUB STREMIO-GRADE UI STYLES
+   ========================================================================== */
+
+/* Media Card Play Hover Overlay */
+.media-card {
+  position: relative;
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.media-card:hover, .media-card:focus-visible {
+  transform: translateY(-4px);
+  border-color: var(--accent);
+  box-shadow: 0 12px 28px rgba(139, 92, 246, 0.25), 0 0 0 2px rgba(139, 92, 246, 0.4);
+}
+
+.media-card-play-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0.85);
+  width: 52px;
+  height: 52px;
+  background: rgba(139, 92, 246, 0.9);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  color: #ffffff;
+  opacity: 0;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+  pointer-events: none;
+  z-index: 5;
+}
+
+.media-card:hover .media-card-play-overlay,
+.media-card:focus-visible .media-card-play-overlay {
+  opacity: 1;
+  transform: translate(-50%, -50%) scale(1);
+}
+
+/* Horizontal Scrolling Media Rails */
+.media-rail-wrap {
+  margin-bottom: 32px;
+}
+
+.media-rail-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.media-rail-title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.media-rail {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  padding: 6px 4px 18px 4px;
+  scroll-behavior: smooth;
+  -webkit-overflow-scrolling: touch;
+}
+
+.media-rail::-webkit-scrollbar {
+  height: 6px;
+}
+
+.media-rail::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 4px;
+}
+
+.media-rail .media-card {
+  flex: 0 0 190px;
+  min-width: 190px;
+  max-width: 190px;
+}
+
+@media (max-width: 600px) {
+  .media-rail .media-card {
+    flex: 0 0 150px;
+    min-width: 150px;
+    max-width: 150px;
+  }
+}
+
+/* Load More & Infinite Catalog Buttons */
+.load-more-btn-wrap {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 32px 0;
+}
+
+.load-more-btn {
+  padding: 12px 32px;
+  font-size: 1rem;
+  font-weight: 700;
+  border-radius: 30px;
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+  color: #ffffff;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(139, 92, 246, 0.35);
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.load-more-btn:hover, .load-more-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(139, 92, 246, 0.5);
+}
+
+/* Series Seasons & Episodes in Modal */
+.modal-episodes-section {
+  margin-top: 24px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  padding: 16px;
+}
+
+.season-tabs-row {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 10px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.season-tab-btn {
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  color: var(--text-muted);
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--transition-fast);
+}
+
+.season-tab-btn.active, .season-tab-btn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+.episodes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.episode-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
+  gap: 14px;
+}
+
+.episode-item:hover, .episode-item:focus-visible {
+  border-color: var(--accent);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.episode-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  min-width: 0;
+}
+
+.episode-num-badge {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-light);
+  flex-shrink: 0;
+}
+
+.episode-title-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.episode-title-text {
+  font-size: 0.95rem;
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.episode-meta-text {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+}
+
+/* Modal Primary Actions Row */
+.modal-primary-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin: 18px 0;
+}
+
+.modal-play-hero-btn {
+  padding: 12px 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: all var(--transition-fast);
+}
+
+.modal-play-hero-btn:hover, .modal-play-hero-btn:focus-visible {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.6);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 100%);
+}
+
+.modal-stremio-btn {
+  padding: 12px 20px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--accent-light);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-md);
+  text-decoration: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all var(--transition-fast);
+}
+
+.modal-stremio-btn:hover, .modal-stremio-btn:focus-visible {
+  background: var(--accent);
+  color: #ffffff;
+}
+
+/* Video Tap to Play / Fallback Overlay */
+.video-tap-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 15;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+}
+
+.video-tap-btn {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent) 0%, #7c3aed 100%);
+  border: 3px solid #ffffff;
+  color: #ffffff;
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 30px rgba(139, 92, 246, 0.6);
+  animation: pulseTap 2s infinite;
+}
+
+@keyframes pulseTap {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0.7); }
+  70% { transform: scale(1.08); box-shadow: 0 0 0 20px rgba(139, 92, 246, 0); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(139, 92, 246, 0); }
+}
+
+.video-tap-text {
+  margin-top: 16px;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #ffffff;
+}
