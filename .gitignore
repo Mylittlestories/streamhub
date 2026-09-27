@@ -1,0 +1,6 @@
+# StreamHub Pro .gitignore
+.DS_Store
+Thumbs.db
+uploads/
+node_modules/
+*.log

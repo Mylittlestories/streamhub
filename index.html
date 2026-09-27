@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>StreamHub Pro — Universal Streaming & Torrent Dashboard</title>
+  <meta name="description" content="Unified free streaming & torrent dashboard for PC, Android Phone, and Android TV. Torrentio, YTS/YIFY, EZTV, Comet, and Free Legal Platforms in one place.">
+  <meta name="theme-color" content="#090b10">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="StreamHub">
+  
+  <!-- Favicon & Icons -->
+  <link rel="icon" type="image/png" sizes="64x64" href="icons/favicon.png">
+  <link rel="icon" type="image/svg+xml" href="icons/logo.svg">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="manifest" href="manifest.webmanifest">
+  
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-midnight">
+
+  <!-- TV Mode Remote Navigation Banner -->
+  <aside id="tvBanner" class="tv-banner" style="display:none;" aria-live="polite">
+    <div class="tv-banner-content">
+      <span class="tv-icon">🎮</span>
+      <span class="tv-text"><strong>TV Mode Active:</strong> Use D-Pad / Arrow keys to navigate, OK/Enter to select, Back/Esc to return</span>
+      <button class="btn btn-sm btn-outline" id="tvExitBtn" tabindex="0">Exit TV Mode</button>
+    </div>
+  </aside>
+
+  <!-- Top Header Navigation -->
+  <header class="topbar">
+    <div class="brand" id="brandLogo" tabindex="0" role="button" aria-label="StreamHub Home">
+      <img src="icons/logo.svg" alt="StreamHub" class="brand-logo" width="38" height="38">
+      <div class="brand-text">
+        <div class="brand-title">StreamHub <span class="badge-pro">PRO</span></div>
+        <div class="brand-sub">Universal Streaming &amp; Torrent Command Center</div>
+      </div>
+    </div>
+
+    <!-- Global Instant Search -->
+    <div class="topbar-search">
+      <div class="search-input-wrapper">
+        <span class="search-icon">🔎</span>
+        <input id="globalSearch" type="search" placeholder="Search Torrentio, YTS, EZTV, Comet, Free TV…" aria-label="Search movies, shows and streams" autocomplete="off">
+        <button id="clearSearchBtn" class="clear-search-btn" style="display:none;" aria-label="Clear search">✕</button>
+      </div>
+      <button id="globalSearchBtn" class="btn btn-accent" tabindex="0" title="Search all providers">Search</button>
+    </div>
+
+    <!-- Quick Action Controls -->
+    <div class="topbar-actions">
+      <button id="quickStreamBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Direct Magnet / URL Player">
+        <span class="btn-emoji">🧲</span><span class="btn-label">Quick Stream</span>
+      </button>
+      <button id="tvToggleBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Toggle 10-Foot TV Mode (Hotkey: T)">
+        <span class="btn-emoji">📺</span><span class="btn-label">TV Mode</span>
+      </button>
+      <button id="settingsOpenBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Settings & Addon Config">
+        <span class="btn-emoji">⚙️</span><span class="btn-label">Settings</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Search Quick Suggestions Dropdown -->
+  <div id="searchSuggestions" class="search-suggestions" style="display:none;" role="listbox"></div>
+
+  <!-- Main Application Layout -->
+  <div class="layout">
+    <!-- Sidebar / Bottom Navigation Bar -->
+    <nav class="tabbar" id="tabbar" aria-label="Main Sections">
+      <button class="tab active" data-tab="home" tabindex="0">
+        <span class="ic">🏠</span><span class="tab-label">Home</span>
+      </button>
+      <button class="tab" data-tab="search" tabindex="0">
+        <span class="ic">⚡</span><span class="tab-label">Streams &amp; Torrents</span>
+      </button>
+      <button class="tab" data-tab="browse" tabindex="0">
+        <span class="ic">🎬</span><span class="tab-label">Discover</span>
+      </button>
+      <button class="tab" data-tab="watchlist" tabindex="0">
+        <span class="ic">📺</span><span class="tab-label">Watchlist</span>
+      </button>
+      <button class="tab" data-tab="bookmarks" tabindex="0">
+        <span class="ic">🔖</span><span class="tab-label">Bookmarks</span>
+      </button>
+      <button class="tab" data-tab="recs" tabindex="0">
+        <span class="ic">✨</span><span class="tab-label">For You</span>
+      </button>
+      <button class="tab" data-tab="episodes" tabindex="0">
+        <span class="ic">📋</span><span class="tab-label">Episodes</span>
+      </button>
+      <button class="tab" data-tab="marathon" tabindex="0">
+        <span class="ic">🍿</span><span class="tab-label">Marathon</span>
+      </button>
+      <button class="tab" data-tab="releases" tabindex="0">
+        <span class="ic">🔔</span><span class="tab-label">Alerts</span>
+      </button>
+      <button class="tab" data-tab="settings" tabindex="0">
+        <span class="ic">⚙️</span><span class="tab-label">Settings</span>
+      </button>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main id="app" class="content-area">
+
+      <!-- ========================================== -->
+      <!-- 1. HOME PANEL                              -->
+      <!-- ========================================== -->
+      <section class="panel active" id="panel-home">
+        <!-- Hero Welcome Header -->
+        <div class="hero-card">
+          <div class="hero-content">
+            <div class="greeting-badge" id="greetingTime">Welcome back</div>
+            <h1 class="greeting-title" id="greetingTitle">Welcome to StreamHub Pro</h1>
+            <p class="hero-desc">Your all-in-one entertainment station for Torrentio, YIFY/YTS, EZTV, Comet, and 100% Free Legal Streaming. Optimized for PC, Android, and Smart TV.</p>
+            <div class="hero-actions">
+              <button class="btn btn-accent" id="heroSearchAction" tabindex="0">🔍 Search Movies &amp; Shows</button>
+              <button class="btn btn-secondary" id="heroTvAction" tabindex="0">📺 Switch to TV Mode</button>
+              <button class="btn btn-outline" id="heroWatchlistAction" tabindex="0">📋 Open Watchlist</button>
+            </div>
+          </div>
+          <div class="hero-stats-badge" id="heroStatsOverview"></div>
+        </div>
+
+        <!-- Provider Quick Hub -->
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h2>🚀 Quick Streaming Hub</h2>
+            <p class="section-sub">Direct access to Torrent Scrapers, Stremio Addons &amp; Free Legal Platforms.</p>
+          </div>
+          <div class="provider-pill-filter" id="hubFilter">
+            <button class="pill active" data-hub="all" tabindex="0">All Sources</button>
+            <button class="pill" data-hub="torrents" tabindex="0">Torrents &amp; Addons</button>
+            <button class="pill" data-hub="legal" tabindex="0">Free Legal</button>
+          </div>
+        </div>
+        <div class="grid platform-grid" id="platformGrid"></div>
+
+        <!-- Continue Watching Rail -->
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h2>▶️ Continue Watching</h2>
+            <p class="section-sub">Resume your active series and movies right where you left off.</p>
+          </div>
+          <button class="btn btn-sm btn-outline" id="manageContinueBtn" tabindex="0">View All</button>
+        </div>
+        <div class="rail" id="homeContinue"></div>
+        <div class="empty-state" id="homeContinueEmpty" style="display:none">
+          <div class="empty-icon">🍿</div>
+          <div class="empty-text">No active titles. Add movies or shows to your Watchlist and mark them "Watching".</div>
+        </div>
+
+        <!-- Pinned Bookmarks -->
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h2>📌 Pinned Bookmarks</h2>
+            <p class="section-sub">Your favorite custom streaming channels, scrapers, and portals.</p>
+          </div>
+          <button class="btn btn-sm btn-outline" id="addBookmarkShortcut" tabindex="0">+ Add Bookmark</button>
+        </div>
+        <div class="grid bookmarks-grid" id="homeBookmarks"></div>
+        <div class="empty-state" id="homeBookmarksEmpty" style="display:none">
+          <div class="empty-icon">🔖</div>
+          <div class="empty-text">No pinned bookmarks. Head to the Bookmarks tab to pin your favorite sites!</div>
+        </div>
+
+        <!-- Stats Overview Bar -->
+        <div class="stat-row" id="statRow"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 2. SEARCH & STREAMS PANEL (Torrentio/YTS/EZTV/Comet) -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-search">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>⚡ Universal Stream &amp; Torrent Finder</h1>
+            <p class="section-sub">Multi-source scraper &amp; lookup engine across Torrentio, YTS (YIFY), EZTV, Comet, and Free Legal Services.</p>
+          </div>
+        </div>
+
+        <!-- Search Input Bar with Filter Options -->
+        <div class="search-engine-box">
+          <div class="search-bar-extended">
+            <input id="streamSearchInput" type="search" placeholder="Type movie title, TV show, anime, or IMDb ID (e.g. tt1375666, Inception, Dune, Breaking Bad)…" tabindex="0">
+            <button id="streamSearchBtn" class="btn btn-accent btn-large" tabindex="0">🔎 Find Streams</button>
+          </div>
+          
+          <div class="search-options-row">
+            <div class="filter-group">
+              <span class="filter-label">Source:</span>
+              <button class="chip active" data-src="all" tabindex="0">All Providers</button>
+              <button class="chip" data-src="torrentio" tabindex="0">Torrentio</button>
+              <button class="chip" data-src="yts" tabindex="0">YTS (YIFY)</button>
+              <button class="chip" data-src="eztv" tabindex="0">EZTV (Shows)</button>
+              <button class="chip" data-src="comet" tabindex="0">Comet</button>
+              <button class="chip" data-src="legal" tabindex="0">Legal Free</button>
+            </div>
+            
+            <div class="filter-group">
+              <span class="filter-label">Media:</span>
+              <button class="chip active" data-type="all" tabindex="0">All</button>
+              <button class="chip" data-type="movie" tabindex="0">Movies</button>
+              <button class="chip" data-type="series" tabindex="0">TV Shows</button>
+              <button class="chip" data-type="4k" tabindex="0">4K Ultra HD</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Trending Searches Tags -->
+        <div class="quick-tags-row" id="trendingTags">
+          <span class="quick-tag-label">Popular Searches:</span>
+          <button class="quick-tag" data-query="Dune: Part Two" tabindex="0">Dune: Part Two</button>
+          <button class="quick-tag" data-query="Deadpool & Wolverine" tabindex="0">Deadpool &amp; Wolverine</button>
+          <button class="quick-tag" data-query="House of the Dragon" tabindex="0">House of the Dragon</button>
+          <button class="quick-tag" data-query="Oppenheimer" tabindex="0">Oppenheimer</button>
+          <button class="quick-tag" data-query="Stranger Things" tabindex="0">Stranger Things</button>
+          <button class="quick-tag" data-query="Interstellar" tabindex="0">Interstellar</button>
+          <button class="quick-tag" data-query="The Batman" tabindex="0">The Batman</button>
+          <button class="quick-tag" data-query="Attack on Titan" tabindex="0">Attack on Titan</button>
+        </div>
+
+        <!-- Direct Magnet / Stream Link Launcher Card -->
+        <div class="card magnet-direct-card">
+          <div class="card-inner-flex">
+            <div class="magnet-icon">🧲</div>
+            <div class="magnet-content">
+              <h3>Direct Magnet / Video URL Launcher</h3>
+              <p>Paste any Magnet URI (`magnet:?xt=...`), Torrent InfoHash, or direct MP4/HLS link to play in web player or launch in Stremio/VLC.</p>
+              <div class="magnet-input-row">
+                <input id="directMagnetInput" type="text" placeholder="magnet:?xt=urn:btih:... or https://...video.mp4" tabindex="0">
+                <button id="directMagnetPlayBtn" class="btn btn-accent" tabindex="0">▶️ Play in Web Player</button>
+                <button id="directMagnetStremioBtn" class="btn btn-secondary" tabindex="0">🚀 Stremio</button>
+                <button id="directMagnetExternalBtn" class="btn btn-outline" tabindex="0">🧲 Open Torrent App</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Search Status / Loading Indicator -->
+        <div id="streamSearchLoading" class="search-loader" style="display:none;">
+          <div class="spinner"></div>
+          <p id="searchLoadingText">Scanning Torrentio, YTS, EZTV, Comet &amp; Catalog…</p>
+        </div>
+
+        <!-- Search Results Grid -->
+        <div id="streamSearchResults" class="grid stream-results-grid"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 3. DISCOVER / BROWSE PANEL                 -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-browse">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>🎬 Discover Movies, Shows &amp; Torrents</h1>
+            <p class="section-sub">Browse top trending titles, 4K torrents, hidden gems, and classic cinema.</p>
+          </div>
+        </div>
+
+        <div class="filter-bar">
+          <div class="filter-row" id="browseCategoryTabs">
+            <button class="chip active" data-category="trending" tabindex="0">🔥 Trending Now</button>
+            <button class="chip" data-category="torrents4k" tabindex="0">💎 4K Ultra HD Torrents</button>
+            <button class="chip" data-category="movies" tabindex="0">🎥 Top Movies</button>
+            <button class="chip" data-category="series" tabindex="0">📺 Top Series</button>
+            <button class="chip" data-category="anime" tabindex="0">⚡ Anime Hits</button>
+            <button class="chip" data-category="gems" tabindex="0">✨ Hidden Gems</button>
+            <button class="chip" data-category="classics" tabindex="0">🏛️ Classic Films</button>
+            <button class="chip" data-category="legal" tabindex="0">🌐 100% Free Legal</button>
+          </div>
+
+          <div class="filter-row" id="browseQualityTabs">
+            <span class="hint-label">Resolution:</span>
+            <button class="chip active" data-quality="all" tabindex="0">All Qualities</button>
+            <button class="chip" data-quality="4K" tabindex="0">4K UHD</button>
+            <button class="chip" data-quality="1080p" tabindex="0">1080p FHD</button>
+            <button class="chip" data-quality="720p" tabindex="0">720p HD</button>
+          </div>
+        </div>
+
+        <div class="grid discover-grid" id="browseGrid"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 4. WATCHLIST PANEL                         -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-watchlist">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>📺 Universal Watchlist &amp; Ratings</h1>
+            <p class="section-sub">One central list across every platform and addon. Track status, rate what you finish (★1–5), and feed the recommendation engine.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-sm btn-outline" id="exportWatchlistBtn" tabindex="0">📤 Export</button>
+            <button class="btn btn-sm btn-outline" id="importWatchlistBtn" tabindex="0">📥 Import</button>
+            <input type="file" id="watchlistFileInput" accept=".json" style="display:none;">
+          </div>
+        </div>
+
+        <!-- Add to Watchlist Form -->
+        <form id="watchlistForm" class="form-card">
+          <div class="form-card-title">+ Add New Title to Watchlist</div>
+          <div class="form-row wrap">
+            <input required name="title" placeholder="Title (e.g. Interstellar, Severance)" tabindex="0" class="flex-2">
+            <input name="platform" placeholder="Platform / Addon (e.g. Torrentio, Tubi, YTS)" tabindex="0" class="flex-1">
+            <select name="genre" tabindex="0" class="flex-1">
+              <option value="">Genre…</option>
+              <option>Sci-Fi/Fantasy</option>
+              <option>Action/Thriller</option>
+              <option>Comedy</option>
+              <option>Drama</option>
+              <option>Documentary</option>
+              <option>Horror</option>
+              <option>Anime</option>
+              <option>Crime/Mystery</option>
+              <option>Kids/Family</option>
+              <option>International</option>
+            </select>
+            <input name="runtime" type="number" min="1" placeholder="Runtime (min)" tabindex="0" class="flex-1">
+            <select name="status" tabindex="0" class="flex-1">
+              <option value="towatch">To Watch</option>
+              <option value="watching">Watching</option>
+              <option value="watched">Watched</option>
+            </select>
+            <button class="btn btn-accent" type="submit" tabindex="0">+ Add to Watchlist</button>
+          </div>
+        </form>
+
+        <!-- Watchlist Filters & Search -->
+        <div class="watchlist-controls">
+          <div class="filter-row" id="watchlistStatusFilter">
+            <button class="chip active" data-filter="all" tabindex="0">All (<span id="countAll">0</span>)</button>
+            <button class="chip" data-filter="towatch" tabindex="0">To Watch (<span id="countToWatch">0</span>)</button>
+            <button class="chip" data-filter="watching" tabindex="0">Watching (<span id="countWatching">0</span>)</button>
+            <button class="chip" data-filter="watched" tabindex="0">Watched (<span id="countWatched">0</span>)</button>
+          </div>
+          <div class="watchlist-search">
+            <input id="watchlistSearchInput" type="search" placeholder="Filter watchlist…" tabindex="0">
+          </div>
+        </div>
+
+        <!-- Watchlist Items List -->
+        <div class="watchlist-list" id="watchlistList"></div>
+        <div class="empty-state" id="watchlistEmpty" style="display:none">
+          <div class="empty-icon">📺</div>
+          <div class="empty-text">Your watchlist is empty. Add titles manually above or click "+ Watchlist" on any movie/show card!</div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 5. BOOKMARKS PANEL                         -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-bookmarks">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>🔖 Bookmark Manager &amp; Custom Hub</h1>
+            <p class="section-sub">Build your personalized homepage, organize streaming portals, scrapers, trackers, and web platforms.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-sm btn-outline" id="loadBookmarkPresetsBtn" tabindex="0">⚡ Load Presets</button>
+            <button class="btn btn-sm btn-outline" id="exportBookmarksBtn" tabindex="0">📤 Export</button>
+            <button class="btn btn-sm btn-outline" id="importBookmarksBtn" tabindex="0">📥 Import</button>
+            <input type="file" id="bookmarksFileInput" accept=".json" style="display:none;">
+          </div>
+        </div>
+
+        <!-- Bookmark Form -->
+        <form id="bookmarkForm" class="form-card">
+          <div class="form-card-title">+ Add New Bookmark</div>
+          <div class="form-row wrap">
+            <input required name="title" placeholder="Name (e.g. Torrentio Lite, YTS Movies, Tubi Horror)" tabindex="0" class="flex-2">
+            <input required name="url" placeholder="https://… (or magnet:? / stremio://)" type="url" tabindex="0" class="flex-2">
+            <select name="category" tabindex="0" class="flex-1">
+              <option>General</option>
+              <option>Torrents &amp; Scrapers</option>
+              <option>Free Legal Movies</option>
+              <option>TV Shows</option>
+              <option>Anime</option>
+              <option>Live TV &amp; Sports</option>
+              <option>Documentaries</option>
+            </select>
+            <label class="checkbox-label" tabindex="0">
+              <input type="checkbox" name="pinned" checked> Pin to Home
+            </label>
+            <button class="btn btn-accent" type="submit" tabindex="0">+ Add Bookmark</button>
+          </div>
+        </form>
+
+        <div id="bookmarkFolders" class="bookmark-folders"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 6. RECOMMENDATIONS ("FOR YOU") PANEL       -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-recs">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>✨ Recommendation Engine</h1>
+            <p class="section-sub" id="recsExplain">Dynamic recommendations customized for you. Rate titles as "Watched" in your Watchlist (★1–5) and the algorithm tunes recommendations to your taste.</p>
+          </div>
+          <button class="btn btn-sm btn-outline" id="refreshRecsBtn" tabindex="0">🔄 Refresh Recommendations</button>
+        </div>
+
+        <div class="taste-profile-card" id="tasteProfileCard">
+          <div class="taste-header">Your Taste Profile:</div>
+          <div class="taste-chips" id="tasteChips"></div>
+        </div>
+
+        <div class="grid discover-grid" id="recsList"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 7. SMART EPISODE TRACKER PANEL             -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-episodes">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>📋 Smart Episode &amp; Season Tracker</h1>
+            <p class="section-sub">Track episode progress through your favorite TV series. Includes 1-click links to search episodes on EZTV and Torrentio.</p>
+          </div>
+        </div>
+
+        <!-- Add Show Form -->
+        <form id="showForm" class="form-card">
+          <div class="form-card-title">+ Track a New TV Show</div>
+          <div class="form-row wrap">
+            <input required name="name" placeholder="Show Name (e.g. Breaking Bad, House of the Dragon, The Boys)" tabindex="0" class="flex-2">
+            <input name="platform" placeholder="Source / Platform (e.g. EZTV, Torrentio, Tubi)" tabindex="0" class="flex-1">
+            <input name="seasons" type="number" min="1" max="50" placeholder="Seasons (e.g. 5)" value="1" tabindex="0" class="flex-1">
+            <input name="episodesPerSeason" type="number" min="1" max="100" placeholder="Eps / Season" value="10" tabindex="0" class="flex-1">
+            <button class="btn btn-accent" type="submit" tabindex="0">+ Add Show</button>
+          </div>
+        </form>
+
+        <div id="showsList" class="shows-list"></div>
+        <div class="empty-state" id="showsEmpty" style="display:none">
+          <div class="empty-icon">📋</div>
+          <div class="empty-text">No shows tracked yet. Add a TV series above to start tracking episodes!</div>
+        </div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 8. WEEKEND MARATHON ARCHITECT PANEL        -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-marathon">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>🍿 Weekend Marathon Architect</h1>
+            <p class="section-sub">Design your binge-watching marathon schedule with automated break calculations (snack &amp; meal breaks) and printable itinerary.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-sm btn-outline" id="loadWatchlistMarathonBtn" tabindex="0">📋 Pull from Watchlist</button>
+            <button class="btn btn-sm btn-accent" id="printMarathon" tabindex="0">🖨️ Print / Save Schedule</button>
+          </div>
+        </div>
+
+        <div class="marathon-settings-card">
+          <div class="form-row wrap">
+            <label class="setting-label">
+              <span>Marathon Start Time:</span>
+              <input id="marathonStart" type="time" value="10:00" tabindex="0">
+            </label>
+            <label class="setting-label">
+              <span>Break Interval:</span>
+              <select id="marathonBreakInterval" tabindex="0">
+                <option value="120">Every ~2 Hours (Recommended)</option>
+                <option value="90">Every ~90 Minutes</option>
+                <option value="180">Every ~3 Hours</option>
+              </select>
+            </label>
+            <label class="setting-label">
+              <span>Meal Break Duration:</span>
+              <select id="marathonMealDuration" tabindex="0">
+                <option value="45">45 Minutes</option>
+                <option value="30">30 Minutes</option>
+                <option value="60">60 Minutes</option>
+              </select>
+            </label>
+          </div>
+        </div>
+
+        <!-- Marathon Add Form -->
+        <form id="marathonQuickAdd" class="form-card">
+          <div class="form-card-title">+ Add Title to Marathon Lineup</div>
+          <div class="form-row wrap">
+            <input required name="title" placeholder="Title (e.g. The Dark Knight)" tabindex="0" class="flex-2">
+            <select name="mood" tabindex="0" class="flex-1">
+              <option value="action">Action / Thriller</option>
+              <option value="comedy">Comedy / Feel-Good</option>
+              <option value="scifi">Sci-Fi / Mind-Bender</option>
+              <option value="drama">Drama / Documentary</option>
+              <option value="horror">Horror / Suspense</option>
+            </select>
+            <input required name="runtime" type="number" min="1" placeholder="Runtime (min, e.g. 152)" tabindex="0" class="flex-1">
+            <button class="btn btn-accent" type="submit" tabindex="0">+ Add to Marathon</button>
+          </div>
+        </form>
+
+        <div class="marathon-summary" id="marathonSummary"></div>
+        <div class="marathon-cols" id="marathonCols"></div>
+        <div id="marathonSchedule" class="schedule"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 9. RELEASE ALERTS PANEL                    -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-releases">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>🔔 Release Alert &amp; Countdown System</h1>
+            <p class="section-sub">Track upcoming digital, theatrical, and streaming releases. One-click live lookups across JustWatch, Torrentio, YTS, EZTV, and Google Alerts.</p>
+          </div>
+        </div>
+
+        <!-- Add Release Form -->
+        <form id="releaseForm" class="form-card">
+          <div class="form-card-title">+ Track Upcoming Movie / TV Show</div>
+          <div class="form-row wrap">
+            <input required name="title" placeholder="Title (e.g. Avatar 3, GTA VI, Batman II)" tabindex="0" class="flex-2">
+            <input name="releaseDate" type="date" tabindex="0" class="flex-1">
+            <input name="type" placeholder="Type / Studio (e.g. Theatrical, HBO Max)" tabindex="0" class="flex-1">
+            <button class="btn btn-accent" type="submit" tabindex="0">+ Track Title</button>
+          </div>
+        </form>
+
+        <div id="releasesList" class="releases-list"></div>
+
+        <!-- Streaming Checker Guide -->
+        <details class="infobox" tabindex="0">
+          <summary>📌 Sources to check for release availability</summary>
+          <div class="infobox-content">
+            <ol>
+              <li><strong>Torrentio / Comet:</strong> Real-time tracker index for new digital web-rips and 4K HDR releases.</li>
+              <li><strong>YTS / YIFY:</strong> Instant movie torrent releases in 720p/1080p/4K with small file sizes.</li>
+              <li><strong>EZTV:</strong> Instant TV series and daily episode torrent releases.</li>
+              <li><strong>JustWatch &amp; Reelgood:</strong> Worldwide official legal streaming availability calendar.</li>
+              <li><strong>IMDb &amp; Trakt:</strong> Confirmed air dates and digital release windows.</li>
+            </ol>
+          </div>
+        </details>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 10. SETTINGS & ADDONS PANEL                -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-settings">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>⚙️ Settings &amp; Addon Configuration</h1>
+            <p class="section-sub">Configure Torrentio, Comet, Real-Debrid API keys, TV Mode defaults, and UI customization.</p>
+          </div>
+        </div>
+
+        <div class="settings-grid">
+          <!-- Torrentio & Debrid Config -->
+          <div class="settings-card">
+            <h3>⚡ Torrentio &amp; Debrid Settings</h3>
+            <p class="settings-hint">Configure Real-Debrid / AllDebrid / Premiumize token to unlock high-speed cached streaming without seeding requirements.</p>
+            
+            <div class="form-group">
+              <label for="settingDebridProvider">Debrid Provider:</label>
+              <select id="settingDebridProvider" tabindex="0">
+                <option value="none">None (P2P / WebTorrent Direct)</option>
+                <option value="realdebrid">Real-Debrid</option>
+                <option value="alldebrid">AllDebrid</option>
+                <option value="premiumize">Premiumize</option>
+                <option value="torbox">TorBox</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="settingDebridKey">Debrid API Token / Key:</label>
+              <input id="settingDebridKey" type="password" placeholder="Enter your Debrid API Key (stored in local browser only)" tabindex="0">
+            </div>
+
+            <div class="form-group">
+              <label for="settingTorrentioUrl">Custom Torrentio Addon URL:</label>
+              <input id="settingTorrentioUrl" type="url" value="https://torrentio.strem.fun" tabindex="0">
+            </div>
+
+            <div class="form-group">
+              <label for="settingCometUrl">Custom Comet Addon URL:</label>
+              <input id="settingCometUrl" type="url" value="https://comet.elfhosted.com" tabindex="0">
+            </div>
+
+            <button id="saveAddonSettingsBtn" class="btn btn-accent" tabindex="0">Save Addon Config</button>
+          </div>
+
+          <!-- UI & TV Experience Config -->
+          <div class="settings-card">
+            <h3>📺 TV &amp; Appearance Settings</h3>
+            <p class="settings-hint">Customize theme colors, UI scale, and remote control behavior for TV / Mobile / PC.</p>
+
+            <div class="form-group">
+              <label for="settingTheme">Color Theme:</label>
+              <select id="settingTheme" tabindex="0">
+                <option value="theme-midnight">Midnight Cinema (Deep Blue & Violet)</option>
+                <option value="theme-oled">OLED Pure Black (High Contrast)</option>
+                <option value="theme-cyberpunk">Cyberpunk Neon (Purple & Cyan)</option>
+                <option value="theme-emerald">Emerald Matrix (Dark Green & Slate)</option>
+                <option value="theme-crimson">Crimson Luxe (Red & Charcoal)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="checkbox-label" tabindex="0">
+                <input type="checkbox" id="settingAutoTvMode"> Auto-detect TV screen &amp; enable TV Mode on launch
+              </label>
+            </div>
+
+            <div class="form-group">
+              <label for="settingDefaultPlayer">Default Stream Player:</label>
+              <select id="settingDefaultPlayer" tabindex="0">
+                <option value="webplayer">In-App Web Player</option>
+                <option value="stremio">Stremio (App / Web)</option>
+                <option value="magnet">Magnet Torrent App (qBittorrent / Flud)</option>
+                <option value="vlc">VLC Media Player</option>
+              </select>
+            </div>
+
+            <button id="saveUiSettingsBtn" class="btn btn-accent" tabindex="0">Save UI Preferences</button>
+          </div>
+
+          <!-- Full Backup & Restore -->
+          <div class="settings-card full-width">
+            <h3>💾 Data Backup &amp; Synchronization</h3>
+            <p class="settings-hint">Export your entire StreamHub setup (Watchlist, Bookmarks, Episode Progress, Marathon, Alerts, Settings) into a single JSON file to transfer between TV, phone, and PC.</p>
+            <div class="btn-group">
+              <button id="exportAllDataBtn" class="btn btn-outline" tabindex="0">📤 Export Complete Backup (JSON)</button>
+              <button id="importAllDataBtn" class="btn btn-outline" tabindex="0">📥 Import Complete Backup (JSON)</button>
+              <button id="resetFactoryBtn" class="btn btn-danger" tabindex="0">⚠️ Reset App to Default</button>
+              <input type="file" id="fullBackupFileInput" accept=".json" style="display:none;">
+            </div>
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 1: STREAM & DETAILS MODAL            -->
+  <!-- ========================================== -->
+  <div id="streamModal" class="modal-backdrop" style="display:none;" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal-dialog modal-lg">
+      <button class="modal-close" id="streamModalClose" aria-label="Close modal" tabindex="0">✕</button>
+      <div class="modal-body" id="streamModalBody">
+        <!-- Dynamically injected stream details -->
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- MODAL 2: IN-APP WEB VIDEO PLAYER           -->
+  <!-- ========================================== -->
+  <div id="playerModal" class="modal-backdrop modal-player-backdrop" style="display:none;" role="dialog" aria-modal="true">
+    <div class="modal-player-dialog">
+      <div class="player-header">
+        <div class="player-title" id="playerTitle">StreamHub Player</div>
+        <div class="player-header-actions">
+          <button class="btn btn-sm btn-outline" id="playerStremioBtn" tabindex="0" title="Switch to Stremio">🚀 Open in Stremio</button>
+          <button class="btn btn-sm btn-outline" id="playerExternalBtn" tabindex="0" title="Open Magnet">🧲 Magnet</button>
+          <button class="modal-close" id="playerModalClose" aria-label="Close player" tabindex="0">✕</button>
+        </div>
+      </div>
+      
+      <div class="player-video-container">
+        <video id="mainVideoPlayer" controls playsinline crossorigin="anonymous" tabindex="0"></video>
+        <div id="playerNotice" class="player-notice" style="display:none;">
+          <div class="notice-icon">📡</div>
+          <h4 id="playerNoticeTitle">Direct Stream / P2P Streaming</h4>
+          <p id="playerNoticeDesc">Connecting to stream sources…</p>
+          <div class="notice-buttons" id="playerNoticeButtons"></div>
+        </div>
+      </div>
+
+      <div class="player-controls-bar">
+        <div class="player-controls-left">
+          <span class="stream-badge" id="playerStreamQuality">HD Stream</span>
+          <span class="stream-info" id="playerStreamInfo"></span>
+        </div>
+        <div class="player-controls-right">
+          <button class="btn btn-sm btn-outline" id="playerCopyUrlBtn" tabindex="0">📋 Copy Stream URL</button>
+          <button class="btn btn-sm btn-outline" id="playerVlcBtn" tabindex="0">📺 Open VLC</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================== -->
+  <!-- TOAST NOTIFICATIONS                        -->
+  <!-- ========================================== -->
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <!-- Application Logic -->
+  <script src="app.js"></script>
+</body>
+</html>
