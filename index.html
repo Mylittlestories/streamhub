@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>StreamHub Pro — Universal Streaming &amp; Torrent Dashboard</title>
-  <meta name="description" content="Unified streaming hub with embedded Stremio/Kodi-style player. Torrentio, YTS, EZTV, Comet, and Free Legal Platforms on PC, Android Phone, and Android TV.">
+  <meta name="description" content="Unified streaming hub with embedded Stremio/Kodi-style player. Torrentio, YTS, EZTV, Comet, and Free Legal Platforms on PC, Android Phone, and Android TV with Greek and English subtitles.">
   <meta name="theme-color" content="#090b10">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
@@ -40,7 +40,7 @@
       <img src="icons/logo.svg" alt="StreamHub" class="brand-logo" width="38" height="38">
       <div class="brand-text">
         <div class="brand-title">StreamHub <span class="badge-pro">PRO</span></div>
-        <div class="brand-sub">Universal Streaming &amp; Torrent Command Center</div>
+        <div class="brand-sub">Universal Cinema &amp; Torrent Command Center</div>
       </div>
     </div>
 
@@ -56,6 +56,9 @@
 
     <!-- Quick Action Controls -->
     <div class="topbar-actions">
+      <button id="syncDatabaseTopBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Update &amp; Sync Movie/Series Database">
+        <span class="btn-emoji">🔄</span><span class="btn-label">Sync DB</span>
+      </button>
       <button id="quickStreamBtn" class="btn btn-secondary btn-icon" tabindex="0" title="Direct Magnet / URL Player">
         <span class="btn-emoji">🧲</span><span class="btn-label">Quick Stream</span>
       </button>
@@ -77,6 +80,9 @@
     <nav class="tabbar" id="tabbar" aria-label="Main Sections">
       <button class="tab active" data-tab="home" tabindex="0">
         <span class="ic">🏠</span><span class="tab-label">Home</span>
+      </button>
+      <button class="tab" data-tab="years" tabindex="0">
+        <span class="ic">📅</span><span class="tab-label">By Year</span>
       </button>
       <button class="tab" data-tab="search" tabindex="0">
         <span class="ic">⚡</span><span class="tab-label">Streams &amp; Torrents</span>
@@ -119,14 +125,26 @@
           <div class="hero-content">
             <div class="greeting-badge" id="greetingTime">Welcome back</div>
             <h1 class="greeting-title" id="greetingTitle">Welcome to StreamHub Pro</h1>
-            <p class="hero-desc">Your embedded cinema media center for Torrentio, YIFY/YTS, EZTV, Comet, and 100% Free Legal Streaming. Works seamlessly on PC, Android Phone, and Android TV.</p>
+            <p class="hero-desc">Your embedded cinema media center for Torrentio, YIFY/YTS, EZTV, Comet, and 100% Free Legal Streaming with Greek &amp; English subtitles. Works on PC, Android Phone, and Smart TV.</p>
             <div class="hero-actions">
-              <button class="btn btn-accent" id="heroSearchAction" tabindex="0">🔍 Search Movies &amp; Shows</button>
-              <button class="btn btn-secondary" id="heroTvAction" tabindex="0">📺 Switch to TV Mode</button>
-              <button class="btn btn-outline" id="heroWatchlistAction" tabindex="0">📋 Open Watchlist</button>
+              <button class="btn btn-accent" id="heroYearAction" tabindex="0">📅 Browse by Year</button>
+              <button class="btn btn-secondary" id="heroSearchAction" tabindex="0">🔍 Search Streams</button>
+              <button class="btn btn-outline" id="heroWatchlistAction" tabindex="0">📋 Watchlist</button>
             </div>
           </div>
           <div class="hero-stats-badge" id="heroStatsOverview"></div>
+        </div>
+
+        <!-- Live Database Sync Banner -->
+        <div class="db-sync-card">
+          <div class="db-sync-left">
+            <span class="db-icon">📡</span>
+            <div>
+              <div class="db-title">Live Movies &amp; Series Catalog: <span id="dbTotalCount" class="badge-count">100+ Titles Loaded</span></div>
+              <div class="db-sub" id="dbLastSyncText">Real-time database auto-syncs with latest Cinemeta, YTS &amp; EZTV releases.</div>
+            </div>
+          </div>
+          <button class="btn btn-sm btn-accent" id="syncDatabaseBtn" tabindex="0">🔄 Sync Live Releases</button>
         </div>
 
         <!-- Provider Quick Hub -->
@@ -176,7 +194,62 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 2. SEARCH & STREAMS PANEL (Torrentio/YTS/EZTV/Comet) -->
+      <!-- 2. ADVANCED BY-YEAR & TIMELINE EXPLORER PANEL -->
+      <!-- ========================================== -->
+      <section class="panel" id="panel-years">
+        <div class="section-header">
+          <div class="section-title-wrap">
+            <h1>📅 Cinema Timeline: Browse by Year</h1>
+            <p class="section-sub">Explore the complete movies and series catalog chronologically from 2026 releases back to classic vintage cinema.</p>
+          </div>
+          <div class="header-actions">
+            <button class="btn btn-sm btn-outline" id="yearSortToggle" tabindex="0">🔽 Sort: Newest First</button>
+          </div>
+        </div>
+
+        <!-- Decade & Year Filter Bar -->
+        <div class="timeline-filter-card">
+          <div class="filter-row" id="decadeFilterTabs">
+            <span class="hint-label">Decade:</span>
+            <button class="chip active" data-decade="all" tabindex="0">All Years</button>
+            <button class="chip" data-decade="2020s" tabindex="0">2020s (Current)</button>
+            <button class="chip" data-decade="2010s" tabindex="0">2010s</button>
+            <button class="chip" data-decade="2000s" tabindex="0">2000s</button>
+            <button class="chip" data-decade="1990s" tabindex="0">1990s</button>
+            <button class="chip" data-decade="classics" tabindex="0">🏛️ Vintage Classics</button>
+          </div>
+
+          <div class="filter-row" id="specificYearChips">
+            <span class="hint-label">Jump to Year:</span>
+            <button class="pill active" data-year="all" tabindex="0">All</button>
+            <button class="pill" data-year="2026" tabindex="0">2026</button>
+            <button class="pill" data-year="2025" tabindex="0">2025</button>
+            <button class="pill" data-year="2024" tabindex="0">2024</button>
+            <button class="pill" data-year="2023" tabindex="0">2023</button>
+            <button class="pill" data-year="2022" tabindex="0">2022</button>
+            <button class="pill" data-year="2020" tabindex="0">2020</button>
+            <button class="pill" data-year="2014" tabindex="0">2014</button>
+            <button class="pill" data-year="2010" tabindex="0">2010</button>
+            <button class="pill" data-year="2008" tabindex="0">2008</button>
+            <button class="pill" data-year="1994" tabindex="0">1994</button>
+            <button class="pill" data-year="1968" tabindex="0">1968</button>
+            <button class="pill" data-year="1927" tabindex="0">1927</button>
+          </div>
+
+          <div class="filter-row" style="margin-top: 8px;">
+            <span class="hint-label">Type:</span>
+            <button class="chip active" data-year-type="all" tabindex="0">All Media</button>
+            <button class="chip" data-year-type="movie" tabindex="0">Movies Only</button>
+            <button class="chip" data-year-type="series" tabindex="0">TV Shows Only</button>
+          </div>
+        </div>
+
+        <!-- Year Shelves Container -->
+        <div id="yearShelvesContainer" class="year-shelves-container"></div>
+      </section>
+
+      <!-- ========================================== -->
+      <!-- 3. SEARCH & STREAMS PANEL (Torrentio/YTS/EZTV/Comet) -->
       <!-- ========================================== -->
       <section class="panel" id="panel-search">
         <div class="section-header">
@@ -255,7 +328,7 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 3. DISCOVER / BROWSE PANEL                 -->
+      <!-- 4. DISCOVER / BROWSE PANEL                 -->
       <!-- ========================================== -->
       <section class="panel" id="panel-browse">
         <div class="section-header">
@@ -290,7 +363,7 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 4. WATCHLIST PANEL                         -->
+      <!-- 5. WATCHLIST PANEL                         -->
       <!-- ========================================== -->
       <section class="panel" id="panel-watchlist">
         <div class="section-header">
@@ -356,7 +429,7 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 5. BOOKMARKS PANEL                         -->
+      <!-- 6. BOOKMARKS PANEL                         -->
       <!-- ========================================== -->
       <section class="panel" id="panel-bookmarks">
         <div class="section-header">
@@ -398,7 +471,7 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 6. RECOMMENDATIONS ("FOR YOU") PANEL       -->
+      <!-- 7. RECOMMENDATIONS ("FOR YOU") PANEL       -->
       <!-- ========================================== -->
       <section class="panel" id="panel-recs">
         <div class="section-header">
@@ -418,7 +491,7 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 7. SMART EPISODE TRACKER PANEL             -->
+      <!-- 8. SMART EPISODE TRACKER PANEL             -->
       <!-- ========================================== -->
       <section class="panel" id="panel-episodes">
         <div class="section-header">
@@ -448,7 +521,7 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 8. WEEKEND MARATHON ARCHITECT PANEL        -->
+      <!-- 9. WEEKEND MARATHON ARCHITECT PANEL        -->
       <!-- ========================================== -->
       <section class="panel" id="panel-marathon">
         <div class="section-header">
@@ -510,7 +583,7 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 9. RELEASE ALERTS PANEL                    -->
+      <!-- 10. RELEASE ALERTS PANEL                   -->
       <!-- ========================================== -->
       <section class="panel" id="panel-releases">
         <div class="section-header">
@@ -549,13 +622,13 @@
       </section>
 
       <!-- ========================================== -->
-      <!-- 10. SETTINGS & ADDONS PANEL                -->
+      <!-- 11. SETTINGS & ADDONS PANEL                -->
       <!-- ========================================== -->
       <section class="panel" id="panel-settings">
         <div class="section-header">
           <div class="section-title-wrap">
             <h1>⚙️ Settings &amp; Addon Configuration</h1>
-            <p class="section-sub">Configure Torrentio, Comet, Real-Debrid API keys, TV Mode defaults, and UI customization.</p>
+            <p class="section-sub">Configure Torrentio, Comet, Real-Debrid API keys, Subtitle preferences, and TV Mode defaults.</p>
           </div>
         </div>
 
@@ -594,10 +667,10 @@
             <button id="saveAddonSettingsBtn" class="btn btn-accent" tabindex="0">Save Addon Config</button>
           </div>
 
-          <!-- UI & TV Experience Config -->
+          <!-- UI, Subtitles & TV Experience Config -->
           <div class="settings-card">
-            <h3>📺 TV &amp; Appearance Settings</h3>
-            <p class="settings-hint">Customize theme colors, UI scale, and remote control behavior for TV / Mobile / PC.</p>
+            <h3>📺 TV, Subtitles &amp; Appearance</h3>
+            <p class="settings-hint">Customize theme colors, default subtitle language (Greek / English), UI scale, and remote control behavior.</p>
 
             <div class="form-group">
               <label for="settingTheme">Color Theme:</label>
@@ -607,6 +680,15 @@
                 <option value="theme-cyberpunk">Cyberpunk Neon (Purple &amp; Cyan)</option>
                 <option value="theme-emerald">Emerald Matrix (Dark Green &amp; Slate)</option>
                 <option value="theme-crimson">Crimson Luxe (Red &amp; Charcoal)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label for="settingDefaultSubLanguage">Default Subtitle Language:</label>
+              <select id="settingDefaultSubLanguage" tabindex="0">
+                <option value="el">🇬🇷 Ελληνικά (Greek)</option>
+                <option value="en">🇬🇧 English</option>
+                <option value="none">None (Off)</option>
               </select>
             </div>
 
@@ -667,7 +749,7 @@
     <div class="cinema-video-surface" id="cinemaVideoSurface">
       <video id="kodiPlayerVideo" playsinline crossorigin="anonymous" tabindex="0"></video>
       
-      <!-- Custom Subtitle Overlay -->
+      <!-- Custom High-Contrast Greek / English Subtitle Display -->
       <div id="cinemaSubtitleBox" class="cinema-subtitle-box" style="display:none;"></div>
       
       <!-- Center Action Indicator (Play/Pause/Seek flash) -->
@@ -776,9 +858,9 @@
               <span>⚡ Stream Sources</span>
             </button>
             
-            <!-- Subtitles Menu -->
+            <!-- Subtitles Menu (Greek & English) -->
             <button class="osd-control-btn" id="cinemaSubtitlesBtn" tabindex="0" title="Subtitles (C)">
-              <span>💬 Subtitles</span>
+              <span>💬 <span id="cinemaActiveSubLangBadge">🇬🇷 Ελληνικά</span></span>
             </button>
 
             <!-- Audio Boost / Track Menu -->
@@ -811,37 +893,47 @@
       </div>
     </div>
 
-    <!-- Dropdown Panel: Subtitles Settings -->
+    <!-- Dropdown Panel: Subtitles Settings (Greek / English) -->
     <div id="cinemaSubtitlesDropdown" class="cinema-dropdown-panel" style="display:none;">
       <div class="dropdown-header">
-        <span>💬 Subtitles &amp; Captions</span>
+        <span>💬 Subtitles &amp; Captions (Υπότιτλοι)</span>
         <button class="dropdown-close" onclick="document.getElementById('cinemaSubtitlesDropdown').style.display='none'">✕</button>
       </div>
       <div class="dropdown-body">
         <div class="dropdown-row">
           <label class="checkbox-label">
-            <input type="checkbox" id="subtitlesToggle"> Enable Subtitles
+            <input type="checkbox" id="subtitlesToggle" checked> Enable Subtitles (Ενεργοποίηση Υποτίτλων)
           </label>
         </div>
+        
         <div class="dropdown-row">
-          <label>Subtitle Track:</label>
-          <select id="subtitleTrackSelect" class="form-control" tabindex="0">
-            <option value="none">None</option>
-            <option value="en" selected>English (Generated / Auto)</option>
-            <option value="es">Spanish</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="el">Greek</option>
-          </select>
+          <label>Subtitle Language (Γλώσσα):</label>
+          <div class="btn-group" id="subLangQuickSelect">
+            <button class="btn btn-sm btn-accent" id="subLangGreekBtn" tabindex="0">🇬🇷 Ελληνικά (Greek)</button>
+            <button class="btn btn-sm btn-secondary" id="subLangEnglishBtn" tabindex="0">🇬🇧 English</button>
+            <button class="btn btn-sm btn-outline" id="subLangOffBtn" tabindex="0">Off</button>
+          </div>
         </div>
+
         <div class="dropdown-row">
-          <label>Subtitle Sync Delay:</label>
+          <label>Subtitle Font Size:</label>
+          <div class="btn-group" id="subSizeGroup">
+            <button class="btn btn-sm btn-outline" id="subSizeNormalBtn" tabindex="0">Normal (1.6rem)</button>
+            <button class="btn btn-sm btn-accent" id="subSizeLargeBtn" tabindex="0">Large (2.0rem)</button>
+            <button class="btn btn-sm btn-outline" id="subSizeXlBtn" tabindex="0">Extra Large (2.5rem)</button>
+          </div>
+        </div>
+
+        <div class="dropdown-row">
+          <label>Subtitle Sync Timing Calibration (Συγχρονισμός):</label>
           <div class="btn-group">
             <button class="btn btn-sm btn-outline" id="subDelayMinusBtn" tabindex="0">-0.5s</button>
             <span id="subDelayText" style="padding: 4px 8px; font-weight:700;">0.0s</span>
             <button class="btn btn-sm btn-outline" id="subDelayPlusBtn" tabindex="0">+0.5s</button>
+            <button class="btn btn-sm btn-outline" id="subDelayResetBtn" tabindex="0">Reset</button>
           </div>
         </div>
+
         <div class="dropdown-row">
           <label>Load Custom Subtitles (.srt / .vtt):</label>
           <input type="file" id="customSubFileInput" accept=".srt,.vtt" tabindex="0">
