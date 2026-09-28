@@ -582,6 +582,21 @@
       document.getElementById('cinemaCloseBtn')?.addEventListener('click', () => this.close());
       document.getElementById('cinemaFullscreenBtn')?.addEventListener('click', () => this.toggleFullscreen());
 
+      document.getElementById('cinemaNewTabBtn')?.addEventListener('click', () => {
+        if (this.activeStream && this.activeStream.url) {
+          window.open(this.activeStream.url, '_blank');
+          showToast('🌐 Opening stream directly in new browser tab…');
+        }
+      });
+
+      document.getElementById('cinemaExoPlayerBtn')?.addEventListener('click', () => {
+        if (this.activeStream && this.activeStream.url) {
+          const exoUrl = `intent:${this.activeStream.url}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
+          window.open(exoUrl, '_blank');
+          showToast('📱 Launching native Android ExoPlayer / VLC…');
+        }
+      });
+
       document.getElementById('cinemaExternalStremioBtn')?.addEventListener('click', () => {
         if (this.activeMedia) {
           const imdb = this.activeMedia.imdb || 'tt1375666';

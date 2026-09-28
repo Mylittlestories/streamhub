@@ -9,7 +9,31 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=6.0.0">
+  <link rel="stylesheet" href="style.css?v=8.0.0">
+
+  <!-- Immediate Cache Invalidation & Stale Service Worker Cleaner -->
+  <script>
+    (function() {
+      // Force update of service worker registrations
+      if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.getRegistrations().then(function(registrations) {
+          for (var i = 0; i < registrations.length; i++) {
+            registrations[i].update();
+          }
+        });
+      }
+      // Purge all obsolete caches
+      if ('caches' in window) {
+        caches.keys().then(function(names) {
+          for (var j = 0; j < names.length; j++) {
+            if (names[j] !== 'streamhub-pro-v8.0.0') {
+              caches.delete(names[j]);
+            }
+          }
+        });
+      }
+    })();
+  </script>
 
   <!-- Local Bundled Hls.js & WebTorrent libraries for Static GitHub Pages -->
   <script src="libs/hls.min.js"></script>
@@ -805,10 +829,7 @@
     <!-- Video Surface -->
     <div class="cinema-video-surface" id="cinemaVideoSurface">
       <!-- 1. Real Full Movie & TV Series Embed Stream Player -->
-      <iframe id="cinemaIframePlayer" class="cinema-stream-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" style="display:none;"></iframe>
-
-      <!-- 2. Native HTML5 Video Element (For Direct Streams / Debrid / WebTorrent) -->
-      <video id="kodiPlayerVideo" playsinline tabindex="0"></video>
+      <iframe id="cinemaIframePlayer" class="cinema-stream-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager"></iframe>
       
       <!-- Video Tap to Play / Autoplay Resumer Overlay -->
       <div id="cinemaTapOverlay" class="video-tap-overlay" style="display:none;">
@@ -862,11 +883,11 @@
 
         <div class="osd-top-right">
           <span class="osd-badge" id="cinemaQualityBadge">4K UHD</span>
-          <button class="osd-btn" id="cinemaAspectBtn" tabindex="0" title="Aspect Ratio Mode">
-            <span class="osd-icon">↔️</span>
+          <button class="osd-btn" id="cinemaNewTabBtn" tabindex="0" title="Open Stream in Direct New Tab (Bypass Browser Sandbox)">
+            <span class="osd-icon">🌐</span>
           </button>
-          <button class="osd-btn" id="cinemaPipBtn" tabindex="0" title="Picture-in-Picture">
-            <span class="osd-icon">🗗</span>
+          <button class="osd-btn" id="cinemaExoPlayerBtn" tabindex="0" title="Launch in Native Android ExoPlayer / VLC">
+            <span class="osd-icon">📱</span>
           </button>
           <button class="osd-btn" id="cinemaExternalStremioBtn" tabindex="0" title="Launch in Stremio">
             <span class="osd-icon">🚀</span>
@@ -1037,6 +1058,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Main Master Application Script -->
-  <script src="app.js?v=6.0.0"></script>
+  <script src="app.js?v=8.0.0"></script>
 </body>
 </html>
