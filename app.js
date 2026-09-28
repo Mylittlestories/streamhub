@@ -3390,6 +3390,11 @@
   // =========================================================================
 
   function initApp() {
+    // 0. Clean old storage versions
+    ['streamhub_dynamic_catalog_v2', 'streamhub_dynamic_catalog_v3'].forEach(k => {
+      try { localStorage.removeItem(k); } catch (e) {}
+    });
+
     // 1. Load Initial State & Storage
     State.settings = { ...DEFAULT_SETTINGS, ...loadStorage(STORAGE_KEYS.SETTINGS, {}) };
     State.tvMode = loadStorage(STORAGE_KEYS.TV_MODE, State.settings.autoTvMode || false);
