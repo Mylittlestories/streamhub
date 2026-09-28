@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=11.0.0">
+  <link rel="stylesheet" href="style.css?v=12.0.0">
 
   <!-- Immediate Cache Invalidation & Stale Service Worker Cleaner -->
   <script>
@@ -26,7 +26,7 @@
       if ('caches' in window) {
         caches.keys().then(function(names) {
           for (var j = 0; j < names.length; j++) {
-            if (names[j] !== 'streamhub-pro-v11.0.0') {
+            if (names[j] !== 'streamhub-pro-v12.0.0') {
               caches.delete(names[j]);
             }
           }
@@ -882,15 +882,25 @@
           </div>
         </div>
 
-        <div class="cinema-server-pill-row" id="cinemaServerPillsRow"></div>
+        <div class="osd-top-center">
+          <button class="osd-server-select-btn" id="cinemaServerSelectBtn" tabindex="0" title="Switch Stream Server">
+            <span class="server-icon">⚡</span>
+            <span id="cinemaActiveServerName">Server 1: VidSrc Pro</span>
+            <span class="caret">▾</span>
+          </button>
+          <div class="cinema-server-pill-row desktop-only" id="cinemaServerPillsRow"></div>
+        </div>
 
         <div class="osd-top-right">
           <span class="osd-badge" id="cinemaQualityBadge">4K UHD</span>
           <button class="osd-btn" id="cinemaEpisodesBtn" style="display:none;" tabindex="0" title="Episodes by Season">
             <span class="osd-icon">📺 Seasons &amp; Eps</span>
           </button>
-          <button class="osd-btn" id="cinemaTheaterBtn" tabindex="0" title="Toggle Theater Mode (T)">
-            <span class="osd-icon">🎬 Theater</span>
+          <button class="osd-btn" id="cinemaTheaterBtn" tabindex="0" title="Maximize Screen / Rotate to Landscape (F)">
+            <span class="osd-icon">⛶ Maximize</span>
+          </button>
+          <button class="osd-btn" id="cinemaSubsInfoBtn" tabindex="0" title="Greek &amp; English Subtitles Info (C)">
+            <span class="osd-icon">🇬🇷 Subs</span>
           </button>
           <button class="osd-btn" id="cinemaNewTabBtn" tabindex="0" title="Open Stream in Direct New Tab (Bypass Browser Sandbox)">
             <span class="osd-icon">🌐</span>
@@ -902,6 +912,13 @@
             <span class="osd-icon">🚀</span>
           </button>
         </div>
+      </div>
+
+      <!-- Embed Mode Floating Quick Bar / Helper (Shown during Embed Playback) -->
+      <div id="cinemaEmbedHelperBar" class="cinema-embed-helper-bar" style="display:none;">
+        <span class="embed-helper-tag">🇬🇷 EL / 🇬🇧 EN: Tap [CC] inside video</span>
+        <button class="btn btn-xs btn-outline" id="cinemaEmbedServerSwitchBtn">⚡ Switch Server</button>
+        <button class="btn btn-xs btn-accent" id="cinemaEmbedMaxBtn">⛶ Fullscreen</button>
       </div>
 
       <!-- Middle Feedback Toast Banner -->
@@ -1007,7 +1024,13 @@
           <button class="dropdown-close" id="closeSubDropdownBtn">✕</button>
         </div>
         <div class="dropdown-body">
-          <div class="dropdown-section-title">Language Selection</div>
+          <div class="sub-helper-tip" style="background: rgba(139, 92, 246, 0.15); border: 1px solid rgba(139, 92, 246, 0.35); border-radius: var(--radius-md); padding: 10px 14px; margin-bottom: 14px; font-size: 0.85rem; line-height: 1.4;">
+            <strong style="color: #38bdf8;">🇬🇷 Ελληνικοί Υπότιτλοι (Greek Subs):</strong><br>
+            • In embed stream player, tap the <strong>[CC]</strong> icon or Settings gear in the video player controls.<br>
+            • In P2P / WebTorrent mode, Greek and English subtitles are loaded automatically from OpenSubtitles.
+          </div>
+
+          <div class="dropdown-section-title">Language Quick-Toggle</div>
           <div class="btn-group" style="margin-bottom: 14px;">
             <button class="btn btn-sm btn-accent" id="subLangGreekBtn" tabindex="0">🇬🇷 Ελληνικά (Greek)</button>
             <button class="btn btn-sm btn-secondary" id="subLangEnglishBtn" tabindex="0">🇬🇧 English</button>
@@ -1082,6 +1105,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Main Master Application Script -->
-  <script src="app.js?v=11.0.0"></script>
+  <script src="app.js?v=12.0.0"></script>
 </body>
 </html>

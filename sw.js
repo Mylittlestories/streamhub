@@ -1,5 +1,5 @@
-// StreamHub Pro Service Worker — Real Video Stream Network (v11.0.0)
-const CACHE_NAME = 'streamhub-pro-v11.0.0';
+// StreamHub Pro Service Worker — Real Video Stream Network (v12.0.0)
+const CACHE_NAME = 'streamhub-pro-v12.0.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',

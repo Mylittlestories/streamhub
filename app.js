@@ -581,7 +581,36 @@
 
       document.getElementById('cinemaCloseBtn')?.addEventListener('click', () => this.close());
       document.getElementById('cinemaFullscreenBtn')?.addEventListener('click', () => this.toggleFullscreen());
-      document.getElementById('cinemaTheaterBtn')?.addEventListener('click', () => this.toggleTheaterMode());
+      document.getElementById('cinemaTheaterBtn')?.addEventListener('click', () => this.toggleFullscreen());
+      document.getElementById('cinemaEmbedMaxBtn')?.addEventListener('click', () => this.toggleFullscreen());
+
+      document.getElementById('cinemaServerSelectBtn')?.addEventListener('click', () => this.togglePanel('cinemaSourceDropdown'));
+      document.getElementById('cinemaEmbedServerSwitchBtn')?.addEventListener('click', () => this.togglePanel('cinemaSourceDropdown'));
+      document.getElementById('cinemaSubsInfoBtn')?.addEventListener('click', () => this.togglePanel('cinemaSubtitlesDropdown'));
+      document.getElementById('cinemaSubtitlesBtn')?.addEventListener('click', () => this.togglePanel('cinemaSubtitlesDropdown'));
+      document.getElementById('closeSubDropdownBtn')?.addEventListener('click', () => {
+        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
+      });
+
+      document.getElementById('subLangGreekBtn')?.addEventListener('click', () => {
+        showToast('🇬🇷 Greek (Ελληνικά) Subtitles active! In embed stream, tap [CC] in player controls.');
+        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
+      });
+
+      document.getElementById('subLangEnglishBtn')?.addEventListener('click', () => {
+        showToast('🇬🇧 English Subtitles active! In embed stream, tap [CC] in player controls.');
+        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
+      });
+
+      document.getElementById('subLangOffBtn')?.addEventListener('click', () => {
+        showToast('✕ Subtitles toggled off.');
+        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
+      });
+
+      document.getElementById('cinemaAudioBtn')?.addEventListener('click', () => this.togglePanel('cinemaAudioDropdown'));
+      document.getElementById('closeAudioDropdownBtn')?.addEventListener('click', () => {
+        document.getElementById('cinemaAudioDropdown').style.display = 'none';
+      });
 
       document.getElementById('cinemaEpisodesBtn')?.addEventListener('click', () => this.toggleEpisodesPanel());
       document.getElementById('closeEpisodesDropdownBtn')?.addEventListener('click', () => {
@@ -620,11 +649,24 @@
       });
     },
 
-    toggleTheaterMode() {
-      const isTheater = this.overlay.classList.toggle('theater-mode');
-      const btn = document.getElementById('cinemaTheaterBtn');
-      if (btn) btn.classList.toggle('theater-badge-active', isTheater);
-      showToast(isTheater ? '🎬 Theater Mode Active (Maximized Cinematic View)' : '🖥️ Standard Cinema Player Active');
+    toggleFullscreen() {
+      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
+        const el = this.overlay || document.documentElement;
+        const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
+        if (req) {
+          req.call(el).then(() => {
+            if (screen.orientation && screen.orientation.lock) {
+              screen.orientation.lock('landscape').catch(() => {});
+            }
+          }).catch(() => {});
+        }
+        showToast('⛶ Fullscreen / Landscape Active');
+      } else {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        if (exit) {
+          exit.call(document).catch(() => {});
+        }
+      }
     },
 
     toggleEpisodesPanel() {
@@ -849,6 +891,12 @@
       const iframe = document.getElementById('cinemaIframePlayer');
       const video = document.getElementById('kodiPlayerVideo');
       const torrentBadge = document.getElementById('cinemaTorrentBadge');
+      const embedHelper = document.getElementById('cinemaEmbedHelperBar');
+      const serverNameEl = document.getElementById('cinemaActiveServerName');
+
+      if (serverNameEl) {
+        serverNameEl.textContent = streamObj.provider || streamObj.name || 'Server 1';
+      }
 
       if (streamObj.type === 'intent' || streamObj.type === 'app' || streamObj.type === 'magnet' || streamObj.type === 'newtab') {
         window.open(streamObj.url, '_blank');
@@ -857,7 +905,9 @@
       }
 
       if (streamObj.type === 'torrent') {
+        this.overlay.classList.remove('is-embed-stream');
         if (iframe) iframe.style.display = 'none';
+        if (embedHelper) embedHelper.style.display = 'none';
         if (video) {
           video.style.display = 'block';
           if (torrentBadge) {
@@ -874,15 +924,17 @@
       }
 
       // Embed Streaming mode (with Anti-Popup Sandbox)
+      this.overlay.classList.add('is-embed-stream');
       if (video) video.style.display = 'none';
       if (torrentBadge) torrentBadge.style.display = 'none';
+      if (embedHelper) embedHelper.style.display = 'flex';
 
       if (iframe) {
         iframe.src = streamObj.url;
         iframe.style.display = 'block';
       }
 
-      showToast(`🎬 Streaming: ${streamObj.provider || 'Cinema Stream'} • Anti-Popup Sandbox Active 🛡️`);
+      showToast(`🎬 ${streamObj.provider || 'Stream'} Active • Tap [CC] in player for 🇬🇷 Greek & 🇬🇧 English Subs`);
       this.renderSourceSwitcher();
       this.renderServerPills();
     },
