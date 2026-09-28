@@ -650,14 +650,16 @@
       const magnetUri = `magnet:?xt=urn:btih:a1b2c3d4e5f60718293a4b5c6d7e8f9012345678&dn=${encodeURIComponent(cleanTitle)}${FAST_TRACKERS}`;
 
       return [
-        { name: `⚡ Stream 1: Torrentio P2P (Zero Ads • Greek & Eng Subs)`, quality: '4K / 1080p', type: 'torrent', magnet: magnetUri, provider: 'Torrentio P2P' },
-        { name: `🚀 Stream 2: Launch in Stremio App (Flawless Engine)`, quality: 'Direct App', type: 'app', url: stremioDeepLink, provider: 'Stremio App' },
-        { name: `📱 Stream 3: ExoPlayer Launcher (Android & TV)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
-        { name: `🛡️ Stream 4: VidSrc Pro (Anti-Popup Sandboxed)`, quality: '4K / 1080p', type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
-        { name: `🛡️ Stream 5: 2Embed HD (Anti-Popup Sandboxed)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
-        { name: `🛡️ Stream 6: VidSrc.me (Fast Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
-        { name: `🛡️ Stream 7: SmashyStream (Fast CDN)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `🛡️ Stream 8: NontonGo Cloud Mirror`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `Server 1: VidSrc Pro (Full HD • Greek & Eng Subs)`, quality: '4K / 1080p', type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
+        { name: `Server 2: VidSrc.me (Fast Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
+        { name: `Server 3: 2Embed HD (Multi-Audio & Subs)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
+        { name: `Server 4: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
+        { name: `Server 5: NontonGo Cloud Mirror`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `Server 6: VidSrc.pm Direct Mirror`, quality: '1080p FHD', type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
+        { name: `⚡ Torrentio P2P (WebTorrent Engine • Greek Subs)`, quality: '4K / 1080p', type: 'torrent', magnet: magnetUri, provider: 'Torrentio P2P' },
+        { name: `🚀 Launch in Stremio App (Flawless Engine)`, quality: 'Direct App', type: 'app', url: stremioDeepLink, provider: 'Stremio App' },
+        { name: `📱 ExoPlayer Launcher (Android & TV)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
+        { name: `📱 VLC Media Player Launcher`, quality: 'Direct App', type: 'intent', url: vlcIntent, provider: 'VLC' },
         { name: `🌐 Open Full Stream in New Tab`, quality: 'Direct Web', type: 'newtab', url: vidsrcToUrl, provider: 'New Tab' },
         { name: `🧲 Open Magnet in Torrent App`, quality: 'Torrent', type: 'magnet', url: magnetUri, provider: 'Magnet' }
       ];
