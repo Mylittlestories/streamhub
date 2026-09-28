@@ -581,6 +581,15 @@
 
       document.getElementById('cinemaCloseBtn')?.addEventListener('click', () => this.close());
       document.getElementById('cinemaFullscreenBtn')?.addEventListener('click', () => this.toggleFullscreen());
+      document.getElementById('cinemaTheaterBtn')?.addEventListener('click', () => this.toggleTheaterMode());
+
+      document.getElementById('cinemaEpisodesBtn')?.addEventListener('click', () => this.toggleEpisodesPanel());
+      document.getElementById('closeEpisodesDropdownBtn')?.addEventListener('click', () => {
+        document.getElementById('cinemaEpisodesDropdown').style.display = 'none';
+      });
+
+      document.getElementById('cinemaNextEpBtn')?.addEventListener('click', () => this.nextEpisode());
+      document.getElementById('cinemaPrevEpBtn')?.addEventListener('click', () => this.prevEpisode());
 
       document.getElementById('cinemaNewTabBtn')?.addEventListener('click', () => {
         if (this.activeStream && this.activeStream.url) {
@@ -609,6 +618,127 @@
       document.getElementById('closeSourceDropdownBtn')?.addEventListener('click', () => {
         document.getElementById('cinemaSourceDropdown').style.display = 'none';
       });
+    },
+
+    toggleTheaterMode() {
+      const isTheater = this.overlay.classList.toggle('theater-mode');
+      const btn = document.getElementById('cinemaTheaterBtn');
+      if (btn) btn.classList.toggle('theater-badge-active', isTheater);
+      showToast(isTheater ? '🎬 Theater Mode Active (Maximized Cinematic View)' : '🖥️ Standard Cinema Player Active');
+    },
+
+    toggleEpisodesPanel() {
+      const panel = document.getElementById('cinemaEpisodesDropdown');
+      if (!panel) return;
+      const isOpen = panel.style.display !== 'none';
+      document.querySelectorAll('.cinema-dropdown-panel').forEach(p => p.style.display = 'none');
+      if (!isOpen) {
+        this.renderInPlayerEpisodes();
+        panel.style.display = 'flex';
+      } else {
+        panel.style.display = 'none';
+      }
+    },
+
+    async renderInPlayerEpisodes(selectedSeason = null) {
+      if (!this.activeMedia || this.activeMedia.type !== 'series') return;
+      const tabsContainer = document.getElementById('cinemaInPlayerSeasonTabs');
+      const listContainer = document.getElementById('cinemaInPlayerEpisodesList');
+      if (!tabsContainer || !listContainer) return;
+
+      let metaDetails = this.activeMedia;
+      if (!metaDetails.videos || metaDetails.videos.length === 0) {
+        try {
+          const metaUrl = `https://v3-cinemeta.strem.io/meta/series/${metaDetails.imdb}.json`;
+          const res = await fetch(metaUrl);
+          if (res.ok) {
+            const data = await res.json();
+            if (data && data.meta && data.meta.videos) {
+              metaDetails = { ...metaDetails, ...data.meta };
+              registerToCatalog(metaDetails);
+            }
+          }
+        } catch (e) {
+          console.warn('[StreamHub] In-player episodes fetch error:', e);
+        }
+      }
+
+      const videos = metaDetails.videos || [];
+      if (videos.length === 0) {
+        listContainer.innerHTML = '<div style="color:var(--text-muted); padding:10px;">Episode list loading…</div>';
+        return;
+      }
+
+      const seasonMap = {};
+      videos.forEach(v => {
+        const sNum = v.season !== undefined ? v.season : 1;
+        if (!seasonMap[sNum]) seasonMap[sNum] = [];
+        seasonMap[sNum].push(v);
+      });
+
+      const seasonNums = Object.keys(seasonMap).map(Number).sort((a, b) => a - b);
+      const activeS = selectedSeason !== null ? selectedSeason : (this.activeMedia.season || (seasonNums.includes(1) ? 1 : seasonNums[0]));
+
+      tabsContainer.innerHTML = seasonNums.map(sNum => `
+        <button class="season-tab-btn ${sNum === activeS ? 'active' : ''}" data-inplayer-season="${sNum}">
+          ${sNum === 0 ? 'Specials' : `Season ${sNum}`} (${seasonMap[sNum].length})
+        </button>
+      `).join('');
+
+      tabsContainer.querySelectorAll('[data-inplayer-season]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const sVal = parseInt(btn.getAttribute('data-inplayer-season'), 10);
+          this.renderInPlayerEpisodes(sVal);
+        });
+      });
+
+      const currentEpisodes = seasonMap[activeS] || [];
+      listContainer.innerHTML = currentEpisodes.map(ep => {
+        const epNum = ep.episode || ep.number || 1;
+        const isCurrent = (this.activeMedia.season === activeS) && (this.activeMedia.episode === epNum);
+        return `
+          <div class="stream-item ${isCurrent ? 'active' : ''}" style="cursor:pointer;" data-play-season="${activeS}" data-play-episode="${epNum}">
+            <div style="display:flex; align-items:center; gap:10px; min-width:0;">
+              <span class="badge-source ${isCurrent ? 'badge-series' : ''}">S${activeS} E${epNum}</span>
+              <div style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <div style="font-weight:700; font-size:0.9rem;">${escapeHtml(ep.title || ep.name || `Episode ${epNum}`)}</div>
+                <div style="font-size:0.75rem; color:var(--text-muted);">${ep.released ? ep.released.split('T')[0] : 'Available'} • 🇬🇷/🇬🇧 Subs</div>
+              </div>
+            </div>
+            <button class="btn btn-sm ${isCurrent ? 'btn-secondary' : 'btn-accent'}">
+              ${isCurrent ? '▶ Playing' : 'Play'}
+            </button>
+          </div>
+        `;
+      }).join('');
+
+      listContainer.querySelectorAll('[data-play-season]').forEach(el => {
+        el.addEventListener('click', () => {
+          const sNum = parseInt(el.getAttribute('data-play-season'), 10);
+          const eNum = parseInt(el.getAttribute('data-play-episode'), 10);
+          const updated = { ...this.activeMedia, season: sNum, episode: eNum };
+          document.getElementById('cinemaEpisodesDropdown').style.display = 'none';
+          this.open(updated);
+        });
+      });
+    },
+
+    nextEpisode() {
+      if (!this.activeMedia || this.activeMedia.type !== 'series') return;
+      const curEp = this.activeMedia.episode || 1;
+      const curSeason = this.activeMedia.season || 1;
+      const nextEp = curEp + 1;
+      showToast(`⏭️ Next Episode: S${curSeason} E${nextEp}`);
+      this.open({ ...this.activeMedia, season: curSeason, episode: nextEp });
+    },
+
+    prevEpisode() {
+      if (!this.activeMedia || this.activeMedia.type !== 'series') return;
+      const curEp = this.activeMedia.episode || 1;
+      const curSeason = this.activeMedia.season || 1;
+      const prevEp = Math.max(1, curEp - 1);
+      showToast(`⏮️ Previous Episode: S${curSeason} E${prevEp}`);
+      this.open({ ...this.activeMedia, season: curSeason, episode: prevEp });
     },
 
     generateAvailableStreams(item, season = null, episode = null) {
@@ -667,10 +797,19 @@
 
     open(mediaItem, streamSource = null, allStreams = []) {
       this.activeMedia = mediaItem;
+      const isSeries = mediaItem.type === 'series' || (mediaItem.season !== undefined && mediaItem.episode !== undefined);
       const s = mediaItem.season || 1;
       const ep = mediaItem.episode || 1;
       this.availableStreams = allStreams.length > 0 ? allStreams : this.generateAvailableStreams(mediaItem, s, ep);
       this.activeStream = streamSource || this.availableStreams[0];
+
+      const epBtn = document.getElementById('cinemaEpisodesBtn');
+      const prevEpBtn = document.getElementById('cinemaPrevEpBtn');
+      const nextEpBtn = document.getElementById('cinemaNextEpBtn');
+
+      if (epBtn) epBtn.style.display = isSeries ? 'inline-flex' : 'none';
+      if (prevEpBtn) prevEpBtn.style.display = isSeries ? 'inline-flex' : 'none';
+      if (nextEpBtn) nextEpBtn.style.display = isSeries ? 'inline-flex' : 'none';
 
       const titleEl = document.getElementById('cinemaMediaTitle');
       const metaEl = document.getElementById('cinemaMediaMeta');
@@ -678,8 +817,8 @@
 
       if (titleEl) {
         let displayTitle = mediaItem.title;
-        if (mediaItem.season && mediaItem.episode) {
-          displayTitle += ` — S${mediaItem.season} E${mediaItem.episode}`;
+        if (isSeries) {
+          displayTitle += ` — Season ${s} Episode ${ep}`;
         }
         titleEl.textContent = displayTitle;
       }
@@ -1512,27 +1651,17 @@
 
       <!-- TV Series Season & Episode Selector (If Series) -->
       ${metaDetails.type === 'series' && metaDetails.videos && metaDetails.videos.length > 0 ? `
-        <div class="modal-episodes-section">
-          <div style="font-weight:700; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+        <div class="modal-episodes-section" style="margin-top:20px;">
+          <div style="font-weight:800; font-size:1.1rem; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;">
             <span>📺 Seasons &amp; Episodes Guide</span>
-            <span style="font-size:0.8rem; color:var(--text-muted);">${metaDetails.videos.length} Episodes</span>
+            <span style="font-size:0.8rem; color:var(--text-muted);">${metaDetails.videos.length} Total Episodes</span>
           </div>
-          <div class="episodes-list">
-            ${metaDetails.videos.slice(0, 15).map(ep => `
-              <div class="episode-item" tabindex="0">
-                <div class="episode-left">
-                  <span class="episode-num-badge">S${ep.season} E${ep.episode}</span>
-                  <div class="episode-title-info">
-                    <div class="episode-title-text">${escapeHtml(ep.title || ep.name || `Episode ${ep.episode}`)}</div>
-                    <div class="episode-meta-text">Released: ${ep.released ? ep.released.split('T')[0] : 'Available'} • 🇬🇷/🇬🇧 Subs</div>
-                  </div>
-                </div>
-                <button class="btn btn-sm btn-accent" data-action="play-episode" data-imdb="${escapeHtml(metaDetails.imdb)}" data-title="${escapeHtml(metaDetails.title)}" data-season="${ep.season}" data-episode="${ep.episode}" tabindex="0">
-                  ▶️ Play Ep
-                </button>
-              </div>
-            `).join('')}
-          </div>
+          
+          <!-- Season Selector Tabs -->
+          <div class="season-tabs-container" id="modalSeasonTabs"></div>
+          
+          <!-- Episodes Grid for Selected Season -->
+          <div class="episodes-grid-season" id="modalSeasonEpisodesGrid"></div>
         </div>
       ` : ''}
 
@@ -1548,6 +1677,77 @@
     `;
 
     modal.style.display = 'flex';
+
+    // Interactive Series Season & Episode Navigator
+    if (metaDetails.type === 'series' && metaDetails.videos && metaDetails.videos.length > 0) {
+      const seasonMap = {};
+      metaDetails.videos.forEach(v => {
+        const sNum = v.season !== undefined ? v.season : 1;
+        if (!seasonMap[sNum]) seasonMap[sNum] = [];
+        seasonMap[sNum].push(v);
+      });
+      const seasonNums = Object.keys(seasonMap).map(Number).sort((a, b) => a - b);
+      let activeSeason = seasonNums.includes(1) ? 1 : seasonNums[0];
+
+      const renderModalSeasonEpisodes = (sNum) => {
+        activeSeason = sNum;
+        const sTabs = document.getElementById('modalSeasonTabs');
+        const sGrid = document.getElementById('modalSeasonEpisodesGrid');
+        if (!sTabs || !sGrid) return;
+
+        sTabs.innerHTML = seasonNums.map(num => `
+          <button class="season-tab-btn ${num === activeSeason ? 'active' : ''}" data-modal-season="${num}">
+            ${num === 0 ? 'Specials' : `Season ${num}`} (${seasonMap[num].length} Eps)
+          </button>
+        `).join('');
+
+        sTabs.querySelectorAll('[data-modal-season]').forEach(b => {
+          b.addEventListener('click', () => {
+            const targetS = parseInt(b.getAttribute('data-modal-season'), 10);
+            renderModalSeasonEpisodes(targetS);
+          });
+        });
+
+        const eps = seasonMap[activeSeason] || [];
+        sGrid.innerHTML = eps.map(ep => {
+          const epNum = ep.episode || ep.number || 1;
+          const thumbUrl = ep.thumbnail || `https://episodes.metahub.space/${metaDetails.imdb}/${activeSeason}/${epNum}/w780.jpg`;
+          const exoIntent = `intent:https://vidsrc.to/embed/tv/${metaDetails.imdb}/${activeSeason}/${epNum}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
+          const stremioEpLink = `stremio:///detail/series/${metaDetails.imdb}:${activeSeason}:${epNum}`;
+
+          return `
+            <div class="episode-card-season" data-action="play-episode" data-imdb="${escapeHtml(metaDetails.imdb)}" data-title="${escapeHtml(metaDetails.title)}" data-season="${activeSeason}" data-episode="${epNum}">
+              <div class="episode-card-thumb-wrap">
+                <img src="${escapeHtml(thumbUrl)}" alt="${escapeHtml(ep.title || ep.name || '')}" class="episode-card-thumb" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(metaDetails.imdb)}/img';">
+                <span class="episode-card-season-badge">S${activeSeason} • E${epNum}</span>
+                <div class="episode-card-play-btn">▶</div>
+              </div>
+              <div class="episode-card-body">
+                <div class="episode-card-title">${escapeHtml(ep.title || ep.name || `Episode ${epNum}`)}</div>
+                <div class="episode-card-meta">
+                  <span>📅 ${ep.released ? ep.released.split('T')[0] : 'Available'}</span>
+                  <span>🇬🇷/🇬🇧 Subs</span>
+                </div>
+                <p class="episode-card-overview">${escapeHtml(ep.overview || ep.description || 'Watch full episode with multi-server streams and Greek/English subtitles.')}</p>
+                <div class="episode-card-actions">
+                  <button class="btn btn-sm btn-accent" data-action="play-episode" data-imdb="${escapeHtml(metaDetails.imdb)}" data-title="${escapeHtml(metaDetails.title)}" data-season="${activeSeason}" data-episode="${epNum}">
+                    ▶️ Play Ep
+                  </button>
+                  <a href="${escapeHtml(stremioEpLink)}" class="btn btn-sm btn-secondary" title="Open in Stremio">
+                    🚀 Stremio
+                  </a>
+                  <a href="${escapeHtml(exoIntent)}" class="btn btn-sm btn-outline" title="Launch ExoPlayer / VLC">
+                    📱
+                  </a>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      };
+
+      renderModalSeasonEpisodes(activeSeason);
+    }
 
     const tabs = modalBody.querySelectorAll('[data-src-tab]');
     tabs.forEach(tab => {
@@ -2695,6 +2895,18 @@
         } else if (e.key === 'f' || e.key === 'F') {
           e.preventDefault();
           CinemaPlayer.toggleFullscreen();
+        } else if (e.key === 't' || e.key === 'T') {
+          e.preventDefault();
+          CinemaPlayer.toggleTheaterMode();
+        } else if (e.key === 'e' || e.key === 'E') {
+          e.preventDefault();
+          CinemaPlayer.toggleEpisodesPanel();
+        } else if (e.key === 'n' || e.key === 'N') {
+          e.preventDefault();
+          CinemaPlayer.nextEpisode();
+        } else if (e.key === 'p' || e.key === 'P') {
+          e.preventDefault();
+          CinemaPlayer.prevEpisode();
         }
         return;
       }

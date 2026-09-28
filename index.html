@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=10.0.0">
+  <link rel="stylesheet" href="style.css?v=11.0.0">
 
   <!-- Immediate Cache Invalidation & Stale Service Worker Cleaner -->
   <script>
@@ -26,7 +26,7 @@
       if ('caches' in window) {
         caches.keys().then(function(names) {
           for (var j = 0; j < names.length; j++) {
-            if (names[j] !== 'streamhub-pro-v10.0.0') {
+            if (names[j] !== 'streamhub-pro-v11.0.0') {
               caches.delete(names[j]);
             }
           }
@@ -886,6 +886,12 @@
 
         <div class="osd-top-right">
           <span class="osd-badge" id="cinemaQualityBadge">4K UHD</span>
+          <button class="osd-btn" id="cinemaEpisodesBtn" style="display:none;" tabindex="0" title="Episodes by Season">
+            <span class="osd-icon">📺 Seasons &amp; Eps</span>
+          </button>
+          <button class="osd-btn" id="cinemaTheaterBtn" tabindex="0" title="Toggle Theater Mode (T)">
+            <span class="osd-icon">🎬 Theater</span>
+          </button>
           <button class="osd-btn" id="cinemaNewTabBtn" tabindex="0" title="Open Stream in Direct New Tab (Bypass Browser Sandbox)">
             <span class="osd-icon">🌐</span>
           </button>
@@ -930,8 +936,11 @@
             <button class="cinema-ctrl-btn" id="cinemaSeekFwdBtn" tabindex="0" title="Seek Forward 10s (Right Arrow)">
               <span>10s ⏩</span>
             </button>
+            <button class="cinema-ctrl-btn" id="cinemaPrevEpBtn" style="display:none;" tabindex="0" title="Previous Episode">
+              <span>⏮️ Prev</span>
+            </button>
             <button class="cinema-ctrl-btn" id="cinemaNextEpBtn" style="display:none;" tabindex="0" title="Next Episode">
-              <span>⏭️ Next Ep</span>
+              <span>⏭️ Next</span>
             </button>
 
             <!-- Time Display -->
@@ -1054,6 +1063,18 @@
         </div>
       </div>
 
+      <!-- IN-PLAYER SEASONS & EPISODES SELECTION DROPDOWN -->
+      <div id="cinemaEpisodesDropdown" class="cinema-episodes-panel" style="display:none;">
+        <div class="cinema-episodes-panel-header">
+          <span style="font-weight:800; font-size:1.05rem;">📺 Seasons &amp; Episodes</span>
+          <button class="dropdown-close" id="closeEpisodesDropdownBtn">✕</button>
+        </div>
+        <div class="cinema-episodes-panel-body">
+          <div id="cinemaInPlayerSeasonTabs" class="season-tabs-container"></div>
+          <div id="cinemaInPlayerEpisodesList" style="display:flex; flex-direction:column; gap:8px; margin-top:10px;"></div>
+        </div>
+      </div>
+
     </div>
   </div>
 
@@ -1061,6 +1082,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Main Master Application Script -->
-  <script src="app.js?v=10.0.0"></script>
+  <script src="app.js?v=11.0.0"></script>
 </body>
 </html>
