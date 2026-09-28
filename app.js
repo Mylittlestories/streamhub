@@ -557,9 +557,266 @@
   // 5. EMBEDDED KODI / STREMIO STYLE CINEMA PLAYER (REAL FULL MOVIES & SERIES)
   // =========================================================================
 
+  // =========================================================================
+  // 5. STREMIO-GRADE FULLSCREEN CINEMA PLAYER & SUBTITLE ENGINE
+  // =========================================================================
+
+  const SubtitleEngine = {
+    subtitlesList: [],
+    activeSubtitle: null,
+    cues: [],
+    delay: 0,
+    size: 'normal',
+    startTime: 0,
+    intervalId: null,
+
+    async fetchSubtitlesList(mediaItem) {
+      const trackListEl = document.getElementById('cinemaSubtitlesTrackList');
+      if (trackListEl) {
+        trackListEl.innerHTML = `
+          <div class="sub-track-item active" data-sub-idx="-1" tabindex="0">
+            <span>● Off (Χωρίς Υπότιτλους)</span>
+          </div>
+          <div style="color:var(--text-muted); padding:8px 12px; font-size:0.85rem;">Φόρτωση υποτίτλων από OpenSubtitles…</div>
+        `;
+      }
+
+      this.activeSubtitle = null;
+      this.cues = [];
+      this.hideSubtitleBox();
+
+      if (!mediaItem) return;
+      const imdb = mediaItem.imdb || mediaItem.id || 'tt15239678';
+      const isSeries = mediaItem.type === 'series' || (mediaItem.season !== undefined && mediaItem.episode !== undefined);
+      const s = mediaItem.season || 1;
+      const ep = mediaItem.episode || 1;
+
+      try {
+        const subUrl = isSeries
+          ? `https://opensubtitles-v3.strem.io/subtitles/series/${imdb}:${s}:${ep}.json`
+          : `https://opensubtitles-v3.strem.io/subtitles/movie/${imdb}.json`;
+
+        const res = await fetch(subUrl);
+        if (res.ok) {
+          const data = await res.json();
+          let allSubs = (data && data.subtitles) || [];
+          
+          // Sort: Greek first (ell, el, gre), then English (eng, en), then others
+          const greekSubs = allSubs.filter(sub => ['ell', 'el', 'gre'].includes(sub.lang));
+          const engSubs = allSubs.filter(sub => ['eng', 'en'].includes(sub.lang));
+          const otherSubs = allSubs.filter(sub => !['ell', 'el', 'gre', 'eng', 'en'].includes(sub.lang));
+
+          this.subtitlesList = [...greekSubs, ...engSubs, ...otherSubs];
+          this.renderTrackList();
+
+          // Auto-load first Greek subtitle if available, otherwise English
+          if (greekSubs.length > 0) {
+            this.selectTrack(0);
+          } else if (engSubs.length > 0) {
+            this.selectTrack(0);
+          }
+        } else {
+          this.renderTrackList();
+        }
+      } catch (e) {
+        console.warn('[SubtitleEngine] OpenSubtitles fetch error:', e);
+        this.renderTrackList();
+      }
+    },
+
+    renderTrackList() {
+      const trackListEl = document.getElementById('cinemaSubtitlesTrackList');
+      if (!trackListEl) return;
+
+      if (this.subtitlesList.length === 0) {
+        trackListEl.innerHTML = `
+          <div class="sub-track-item active" data-sub-idx="-1" tabindex="0">
+            <span>● Off (Χωρίς Υπότιτλους)</span>
+          </div>
+          <div style="color:var(--text-muted); padding:8px 12px; font-size:0.85rem;">
+            🇬🇷 Σε embed player ενεργοποιήστε το [CC] στα χειριστήρια του βίντεο.
+          </div>
+        `;
+        return;
+      }
+
+      let html = `
+        <div class="sub-track-item ${this.activeSubtitle === null ? 'active' : ''}" data-sub-idx="-1" tabindex="0">
+          <span>● Off (Χωρίς Υπότιτλους)</span>
+        </div>
+      `;
+
+      this.subtitlesList.forEach((sub, idx) => {
+        const isGreek = ['ell', 'el', 'gre'].includes(sub.lang);
+        const isEng = ['eng', 'en'].includes(sub.lang);
+        const flag = isGreek ? '🇬🇷' : (isEng ? '🇬🇧' : '🌐');
+        const langLabel = isGreek ? 'Ελληνικά (Greek)' : (isEng ? 'English' : sub.lang.toUpperCase());
+        const trackTitle = sub.subtitleFileName || sub.movieReleaseName || `Track ${idx + 1}`;
+        const isActive = this.activeSubtitle && this.activeSubtitle.id === sub.id;
+
+        html += `
+          <div class="sub-track-item ${isActive ? 'active' : ''}" data-sub-idx="${idx}" tabindex="0">
+            <div style="display:flex; align-items:center; gap:8px; min-width:0;">
+              <span style="font-size:1.1rem;">${flag}</span>
+              <div style="min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                <strong style="color:${isGreek ? '#38bdf8' : '#ffffff'};">${langLabel}</strong>
+                <span style="font-size:0.75rem; color:var(--text-muted); margin-left:6px;">${escapeHtml(trackTitle.substring(0, 32))}</span>
+              </div>
+            </div>
+            ${isActive ? '<span style="color:var(--accent); font-weight:800;">✓</span>' : ''}
+          </div>
+        `;
+      });
+
+      trackListEl.innerHTML = html;
+
+      trackListEl.querySelectorAll('[data-sub-idx]').forEach(item => {
+        item.addEventListener('click', () => {
+          const idx = parseInt(item.getAttribute('data-sub-idx'), 10);
+          if (idx === -1) {
+            this.selectTrack(null);
+          } else {
+            this.selectTrack(idx);
+          }
+        });
+      });
+    },
+
+    async selectTrack(indexOrNull) {
+      if (indexOrNull === null || indexOrNull === -1 || !this.subtitlesList[indexOrNull]) {
+        this.activeSubtitle = null;
+        this.cues = [];
+        this.hideSubtitleBox();
+        this.stopRenderLoop();
+        this.renderTrackList();
+        showToast('💬 Υπότιτλοι απενεργοποιήθηκαν');
+        return;
+      }
+
+      const sub = this.subtitlesList[indexOrNull];
+      this.activeSubtitle = sub;
+      this.renderTrackList();
+
+      const isGreek = ['ell', 'el', 'gre'].includes(sub.lang);
+      const langName = isGreek ? '🇬🇷 Ελληνικά (Greek)' : '🇬🇧 English';
+      showToast(`💬 Φόρτωση: ${langName}…`);
+
+      try {
+        const res = await fetch(sub.url);
+        if (res.ok) {
+          const srtText = await res.text();
+          this.cues = this.parseSRT(srtText);
+          this.startTime = performance.now();
+          this.startRenderLoop();
+          showToast(`✓ Υπότιτλοι ενεργοί: ${langName}`);
+        } else {
+          showToast(`⚠️ Αδυναμία λήψης αρχείου υποτίτλων.`);
+        }
+      } catch (e) {
+        console.warn('[SubtitleEngine] SRT download failed:', e);
+      }
+    },
+
+    parseSRT(srtText) {
+      const pattern = /(\d+)\r?\n(\d{2}:\d{2}:\d{2}[,\.]\d{3}) --> (\d{2}:\d{2}:\d{2}[,\.]\d{3})\r?\n([\s\S]*?)(?=\r?\n\r?\n\d+|\r?\n\s*$|$)/g;
+      const cues = [];
+      let match;
+
+      function timeToSec(tStr) {
+        const p = tStr.replace(',', '.').split(':');
+        return (parseFloat(p[0]) || 0) * 3600 + (parseFloat(p[1]) || 0) * 60 + (parseFloat(p[2]) || 0);
+      }
+
+      while ((match = pattern.exec(srtText)) !== null) {
+        cues.push({
+          id: match[1],
+          start: timeToSec(match[2]),
+          end: timeToSec(match[3]),
+          text: match[4].replace(/<[^>]*>/g, '').trim()
+        });
+      }
+      return cues;
+    },
+
+    startRenderLoop() {
+      this.stopRenderLoop();
+      this.intervalId = setInterval(() => {
+        this.updateCueDisplay();
+      }, 100);
+    },
+
+    stopRenderLoop() {
+      if (this.intervalId) {
+        clearInterval(this.intervalId);
+        this.intervalId = null;
+      }
+    },
+
+    updateCueDisplay() {
+      if (this.cues.length === 0 || !this.activeSubtitle) {
+        this.hideSubtitleBox();
+        return;
+      }
+
+      const video = document.getElementById('kodiPlayerVideo');
+      let curSec = 0;
+
+      if (video && video.style.display !== 'none' && !isNaN(video.currentTime)) {
+        curSec = video.currentTime + this.delay;
+      } else {
+        curSec = (performance.now() - this.startTime) / 1000 + this.delay;
+      }
+
+      const activeCue = this.cues.find(c => curSec >= c.start && curSec <= c.end);
+      const box = document.getElementById('cinemaSubtitleBox');
+
+      if (activeCue && box) {
+        box.textContent = activeCue.text;
+        box.style.display = 'block';
+      } else if (box) {
+        box.style.display = 'none';
+      }
+    },
+
+    hideSubtitleBox() {
+      const box = document.getElementById('cinemaSubtitleBox');
+      if (box) {
+        box.style.display = 'none';
+        box.textContent = '';
+      }
+    },
+
+    setDelay(delta) {
+      this.delay += delta;
+      const textEl = document.getElementById('subDelayText');
+      if (textEl) {
+        textEl.textContent = `${this.delay > 0 ? '+' : ''}${this.delay.toFixed(1)}s`;
+      }
+      showToast(`⏱️ Συγχρονισμός: ${this.delay > 0 ? '+' : ''}${this.delay.toFixed(1)}s`);
+    },
+
+    resetDelay() {
+      this.delay = 0;
+      const textEl = document.getElementById('subDelayText');
+      if (textEl) textEl.textContent = '0.0s';
+      showToast('⏱️ Συγχρονισμός: 0.0s');
+    },
+
+    setSize(sizeName) {
+      this.size = sizeName;
+      const box = document.getElementById('cinemaSubtitleBox');
+      if (box) {
+        box.classList.remove('sub-normal', 'sub-large', 'sub-xl');
+        box.classList.add(`sub-${sizeName}`);
+      }
+      showToast(`🔤 Μέγεθος υποτίτλων: ${sizeName.toUpperCase()}`);
+    }
+  };
+
   const CinemaPlayer = {
     overlay: null,
     iframe: null,
+    video: null,
     osd: null,
     activeMedia: null,
     activeStream: null,
@@ -569,47 +826,35 @@
     init() {
       this.overlay = document.getElementById('cinemaPlayer');
       this.iframe = document.getElementById('cinemaIframePlayer');
+      this.video = document.getElementById('kodiPlayerVideo');
       this.osd = document.getElementById('cinemaOsd');
 
-      if (!this.overlay || !this.iframe) return;
-
+      if (!this.overlay) return;
       this.bindEvents();
     },
 
     bindEvents() {
+      // Auto-wake OSD on interaction
       this.overlay.addEventListener('mousemove', () => this.wakeOsd());
+      this.overlay.addEventListener('touchstart', () => this.wakeOsd(), { passive: true });
+      this.overlay.addEventListener('pointerdown', () => this.wakeOsd());
 
+      // Double-click to toggle fullscreen
+      document.getElementById('cinemaVideoSurface')?.addEventListener('dblclick', () => {
+        this.toggleFullscreen();
+      });
+
+      // Top bar buttons
       document.getElementById('cinemaCloseBtn')?.addEventListener('click', () => this.close());
       document.getElementById('cinemaFullscreenBtn')?.addEventListener('click', () => this.toggleFullscreen());
-      document.getElementById('cinemaTheaterBtn')?.addEventListener('click', () => this.toggleFullscreen());
-      document.getElementById('cinemaEmbedMaxBtn')?.addEventListener('click', () => this.toggleFullscreen());
+      document.getElementById('cinemaSourceBtn')?.addEventListener('click', () => this.togglePanel('cinemaSourceDropdown'));
+      document.getElementById('closeSourceDropdownBtn')?.addEventListener('click', () => {
+        document.getElementById('cinemaSourceDropdown').style.display = 'none';
+      });
 
-      document.getElementById('cinemaServerSelectBtn')?.addEventListener('click', () => this.togglePanel('cinemaSourceDropdown'));
-      document.getElementById('cinemaEmbedServerSwitchBtn')?.addEventListener('click', () => this.togglePanel('cinemaSourceDropdown'));
-      document.getElementById('cinemaSubsInfoBtn')?.addEventListener('click', () => this.togglePanel('cinemaSubtitlesDropdown'));
       document.getElementById('cinemaSubtitlesBtn')?.addEventListener('click', () => this.togglePanel('cinemaSubtitlesDropdown'));
       document.getElementById('closeSubDropdownBtn')?.addEventListener('click', () => {
         document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
-      });
-
-      document.getElementById('subLangGreekBtn')?.addEventListener('click', () => {
-        showToast('🇬🇷 Greek (Ελληνικά) Subtitles active! In embed stream, tap [CC] in player controls.');
-        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
-      });
-
-      document.getElementById('subLangEnglishBtn')?.addEventListener('click', () => {
-        showToast('🇬🇧 English Subtitles active! In embed stream, tap [CC] in player controls.');
-        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
-      });
-
-      document.getElementById('subLangOffBtn')?.addEventListener('click', () => {
-        showToast('✕ Subtitles toggled off.');
-        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
-      });
-
-      document.getElementById('cinemaAudioBtn')?.addEventListener('click', () => this.togglePanel('cinemaAudioDropdown'));
-      document.getElementById('closeAudioDropdownBtn')?.addEventListener('click', () => {
-        document.getElementById('cinemaAudioDropdown').style.display = 'none';
       });
 
       document.getElementById('cinemaEpisodesBtn')?.addEventListener('click', () => this.toggleEpisodesPanel());
@@ -617,41 +862,22 @@
         document.getElementById('cinemaEpisodesDropdown').style.display = 'none';
       });
 
-      document.getElementById('cinemaNextEpBtn')?.addEventListener('click', () => this.nextEpisode());
-      document.getElementById('cinemaPrevEpBtn')?.addEventListener('click', () => this.prevEpisode());
+      // Subtitle delay & size controls
+      document.getElementById('subDelayMinusBtn')?.addEventListener('click', () => SubtitleEngine.setDelay(-0.5));
+      document.getElementById('subDelayPlusBtn')?.addEventListener('click', () => SubtitleEngine.setDelay(0.5));
+      document.getElementById('subDelayResetBtn')?.addEventListener('click', () => SubtitleEngine.resetDelay());
 
-      document.getElementById('cinemaNewTabBtn')?.addEventListener('click', () => {
-        if (this.activeStream && this.activeStream.url) {
-          window.open(this.activeStream.url, '_blank');
-          showToast('🌐 Opening stream directly in new browser tab…');
-        }
-      });
-
-      document.getElementById('cinemaExoPlayerBtn')?.addEventListener('click', () => {
-        if (this.activeStream && this.activeStream.url) {
-          const exoUrl = `intent:${this.activeStream.url}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
-          window.open(exoUrl, '_blank');
-          showToast('📱 Launching native Android ExoPlayer / VLC…');
-        }
-      });
-
-      document.getElementById('cinemaExternalStremioBtn')?.addEventListener('click', () => {
-        if (this.activeMedia) {
-          const imdb = this.activeMedia.imdb || 'tt1375666';
-          const type = this.activeMedia.type === 'series' ? 'series' : 'movie';
-          window.open(`stremio:///detail/${type}/${imdb}`, '_blank');
-        }
-      });
-
-      document.getElementById('cinemaSourceBtn')?.addEventListener('click', () => this.togglePanel('cinemaSourceDropdown'));
-      document.getElementById('closeSourceDropdownBtn')?.addEventListener('click', () => {
-        document.getElementById('cinemaSourceDropdown').style.display = 'none';
-      });
+      document.getElementById('subSizeNormalBtn')?.addEventListener('click', () => SubtitleEngine.setSize('normal'));
+      document.getElementById('subSizeLargeBtn')?.addEventListener('click', () => SubtitleEngine.setSize('large'));
+      document.getElementById('subSizeXlBtn')?.addEventListener('click', () => SubtitleEngine.setSize('xl'));
     },
 
     toggleFullscreen() {
-      if (!document.fullscreenElement && !document.webkitFullscreenElement) {
-        const el = this.overlay || document.documentElement;
+      const doc = document;
+      const el = this.overlay || doc.documentElement;
+      const isFull = !!(doc.fullscreenElement || doc.webkitFullscreenElement || doc.mozFullScreenElement || doc.msFullscreenElement);
+
+      if (!isFull) {
         const req = el.requestFullscreen || el.webkitRequestFullscreen || el.mozRequestFullScreen || el.msRequestFullscreen;
         if (req) {
           req.call(el).then(() => {
@@ -660,26 +886,47 @@
             }
           }).catch(() => {});
         }
-        showToast('⛶ Fullscreen / Landscape Active');
+        showToast('⛶ Πλήρης Οθόνη');
       } else {
-        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.mozCancelFullScreen || document.msExitFullscreen;
+        const exit = doc.exitFullscreen || doc.webkitExitFullscreen || doc.mozCancelFullScreen || doc.msExitFullscreen;
         if (exit) {
-          exit.call(document).catch(() => {});
+          exit.call(doc).catch(() => {});
         }
       }
+    },
+
+    togglePanel(panelId) {
+      const panel = document.getElementById(panelId);
+      if (!panel) return;
+      const isOpen = panel.style.display !== 'none';
+      document.querySelectorAll('.cinema-dropdown-panel, .cinema-episodes-panel').forEach(p => p.style.display = 'none');
+      panel.style.display = isOpen ? 'none' : 'block';
     },
 
     toggleEpisodesPanel() {
       const panel = document.getElementById('cinemaEpisodesDropdown');
       if (!panel) return;
       const isOpen = panel.style.display !== 'none';
-      document.querySelectorAll('.cinema-dropdown-panel').forEach(p => p.style.display = 'none');
+      document.querySelectorAll('.cinema-dropdown-panel, .cinema-episodes-panel').forEach(p => p.style.display = 'none');
       if (!isOpen) {
         this.renderInPlayerEpisodes();
         panel.style.display = 'flex';
       } else {
         panel.style.display = 'none';
       }
+    },
+
+    wakeOsd() {
+      if (!this.osd) return;
+      this.osd.classList.add('active');
+      clearTimeout(this.osdHideTimer);
+
+      this.osdHideTimer = setTimeout(() => {
+        const hasOpenDropdown = Array.from(document.querySelectorAll('.cinema-dropdown-panel, .cinema-episodes-panel')).some(p => p.style.display !== 'none');
+        if (!hasOpenDropdown) {
+          this.osd.classList.remove('active');
+        }
+      }, 2500);
     },
 
     async renderInPlayerEpisodes(selectedSeason = null) {
@@ -846,40 +1093,27 @@
       this.activeStream = streamSource || this.availableStreams[0];
 
       const epBtn = document.getElementById('cinemaEpisodesBtn');
-      const prevEpBtn = document.getElementById('cinemaPrevEpBtn');
-      const nextEpBtn = document.getElementById('cinemaNextEpBtn');
-
       if (epBtn) epBtn.style.display = isSeries ? 'inline-flex' : 'none';
-      if (prevEpBtn) prevEpBtn.style.display = isSeries ? 'inline-flex' : 'none';
-      if (nextEpBtn) nextEpBtn.style.display = isSeries ? 'inline-flex' : 'none';
 
       const titleEl = document.getElementById('cinemaMediaTitle');
-      const metaEl = document.getElementById('cinemaMediaMeta');
-      const badgeEl = document.getElementById('cinemaQualityBadge');
-
       if (titleEl) {
         let displayTitle = mediaItem.title;
         if (isSeries) {
-          displayTitle += ` — Season ${s} Episode ${ep}`;
+          displayTitle += ` — S${s} E${ep}`;
+        } else if (mediaItem.year) {
+          displayTitle += ` (${mediaItem.year})`;
         }
         titleEl.textContent = displayTitle;
       }
 
-      if (metaEl) {
-        metaEl.textContent = `${this.activeStream?.quality || 'Full HD'} • ${mediaItem.genre || 'Cinema'} • ${mediaItem.year || 2024} • 🇬🇷 Greek & 🇬🇧 English Subs`;
-      }
-
-      if (badgeEl) {
-        badgeEl.textContent = this.activeStream?.quality || '4K UHD';
-      }
-
       this.renderSourceSwitcher();
-      this.renderServerPills();
-
       this.overlay.style.display = 'flex';
       this.wakeOsd();
 
       this.loadStream(this.activeStream);
+
+      // Fetch Subtitles from OpenSubtitles and populate dropdown
+      SubtitleEngine.fetchSubtitlesList(mediaItem);
 
       if (State.tvMode) {
         setTimeout(() => focusElement(document.getElementById('cinemaCloseBtn')), 200);
@@ -891,12 +1125,6 @@
       const iframe = document.getElementById('cinemaIframePlayer');
       const video = document.getElementById('kodiPlayerVideo');
       const torrentBadge = document.getElementById('cinemaTorrentBadge');
-      const embedHelper = document.getElementById('cinemaEmbedHelperBar');
-      const serverNameEl = document.getElementById('cinemaActiveServerName');
-
-      if (serverNameEl) {
-        serverNameEl.textContent = streamObj.provider || streamObj.name || 'Server 1';
-      }
 
       if (streamObj.type === 'intent' || streamObj.type === 'app' || streamObj.type === 'magnet' || streamObj.type === 'newtab') {
         window.open(streamObj.url, '_blank');
@@ -905,9 +1133,7 @@
       }
 
       if (streamObj.type === 'torrent') {
-        this.overlay.classList.remove('is-embed-stream');
         if (iframe) iframe.style.display = 'none';
-        if (embedHelper) embedHelper.style.display = 'none';
         if (video) {
           video.style.display = 'block';
           if (torrentBadge) {
@@ -916,84 +1142,22 @@
             if (text) text.textContent = 'P2P Torrent Engine: Connecting to 4K WebTorrent swarm…';
           }
         }
-        showToast(`⚡ Streaming via Torrentio P2P Engine • Zero Ads & Popups • 🇬🇷/🇬🇧 Subs`);
-        this.fetchSubtitles();
+        showToast(`⚡ Torrentio P2P • 🇬🇷 Ελληνικοί Υπότιτλοι`);
         this.renderSourceSwitcher();
-        this.renderServerPills();
         return;
       }
 
       // Embed Streaming mode (with Anti-Popup Sandbox)
-      this.overlay.classList.add('is-embed-stream');
       if (video) video.style.display = 'none';
       if (torrentBadge) torrentBadge.style.display = 'none';
-      if (embedHelper) embedHelper.style.display = 'flex';
 
       if (iframe) {
         iframe.src = streamObj.url;
         iframe.style.display = 'block';
       }
 
-      showToast(`🎬 ${streamObj.provider || 'Stream'} Active • Tap [CC] in player for 🇬🇷 Greek & 🇬🇧 English Subs`);
+      showToast(`🎬 ${streamObj.provider || 'Cinema Stream'} • 🇬🇷 Ελληνικοί Υπότιτλοι`);
       this.renderSourceSwitcher();
-      this.renderServerPills();
-    },
-
-    async fetchSubtitles() {
-      if (!this.activeMedia) return;
-      const imdb = this.activeMedia.imdb || 'tt15239678';
-      const isSeries = this.activeMedia.type === 'series';
-      const s = this.activeMedia.season || 1;
-      const ep = this.activeMedia.episode || 1;
-
-      try {
-        const subUrl = isSeries
-          ? `https://opensubtitles-v3.strem.io/subtitles/series/${imdb}:${s}:${ep}.json`
-          : `https://opensubtitles-v3.strem.io/subtitles/movie/${imdb}.json`;
-
-        const res = await fetch(subUrl);
-        if (res.ok) {
-          const data = await res.json();
-          if (data && data.subtitles) {
-            const greek = data.subtitles.find(sub => ['ell', 'el', 'gre'].includes(sub.lang));
-            const english = data.subtitles.find(sub => ['eng', 'en'].includes(sub.lang));
-            const toastEl = document.getElementById('cinemaOsdToast');
-            const toastText = document.getElementById('cinemaOsdToastText');
-            if (toastEl && toastText) {
-              toastText.textContent = `Subtitles Loaded: ${greek ? '🇬🇷 Greek (Ελληνικά)' : ''} ${english ? '🇬🇧 English' : ''}`;
-              toastEl.style.display = 'block';
-              setTimeout(() => toastEl.style.display = 'none', 3500);
-            }
-          }
-        }
-      } catch (e) {
-        console.warn('[StreamHub] Subtitle fetch fallback:', e);
-      }
-    },
-
-    renderServerPills() {
-      const container = document.getElementById('cinemaServerPillsRow');
-      if (!container) return;
-
-      container.innerHTML = this.availableStreams.map((s, idx) => {
-        const isActive = this.activeStream && this.activeStream.name === s.name;
-        const shortName = s.provider || `Server ${idx + 1}`;
-        return `
-          <button class="cinema-server-pill ${isActive ? 'active' : ''}" data-cinema-server-idx="${idx}" tabindex="0">
-            ${escapeHtml(shortName)}
-          </button>
-        `;
-      }).join('');
-
-      container.querySelectorAll('[data-cinema-server-idx]').forEach(btn => {
-        btn.addEventListener('click', () => {
-          const idx = parseInt(btn.getAttribute('data-cinema-server-idx'), 10);
-          const chosen = this.availableStreams[idx];
-          if (chosen) {
-            this.loadStream(chosen);
-          }
-        });
-      });
     },
 
     renderSourceSwitcher() {
@@ -1003,16 +1167,14 @@
       list.innerHTML = this.availableStreams.map((s, idx) => {
         const isActive = this.activeStream && this.activeStream.name === s.name;
         return `
-          <div class="stream-item ${isActive ? 'active' : ''}" data-stream-idx="${idx}" tabindex="0">
+          <div class="sub-track-item ${isActive ? 'active' : ''}" data-stream-idx="${idx}" tabindex="0">
             <div>
               <div style="font-weight:700; font-size:0.9rem;">${escapeHtml(s.name)}</div>
               <div style="font-size:0.75rem; color:var(--text-muted);">
                 ${escapeHtml(s.quality)} • ${escapeHtml(s.provider || 'Cinema Stream')} • 🇬🇷/🇬🇧 Subs
               </div>
             </div>
-            <button class="btn btn-sm ${isActive ? 'btn-secondary' : 'btn-accent'}">
-              ${isActive ? '✓ Selected' : 'Switch'}
-            </button>
+            ${isActive ? '<span style="color:var(--accent); font-weight:800;">✓</span>' : ''}
           </div>
         `;
       }).join('');
@@ -1029,42 +1191,14 @@
       });
     },
 
-    toggleFullscreen() {
-      if (!document.fullscreenElement) {
-        this.overlay.requestFullscreen().catch(() => {});
-      } else {
-        document.exitFullscreen().catch(() => {});
-      }
-    },
-
-    togglePanel(panelId) {
-      const panel = document.getElementById(panelId);
-      if (!panel) return;
-      const isOpen = panel.style.display !== 'none';
-      document.querySelectorAll('.cinema-dropdown-panel').forEach(p => p.style.display = 'none');
-      panel.style.display = isOpen ? 'none' : 'block';
-    },
-
-    wakeOsd() {
-      if (!this.osd) return;
-      this.osd.classList.add('active');
-      clearTimeout(this.osdHideTimer);
-
-      this.osdHideTimer = setTimeout(() => {
-        const hasOpenDropdown = Array.from(document.querySelectorAll('.cinema-dropdown-panel')).some(p => p.style.display !== 'none');
-        if (!hasOpenDropdown) {
-          this.osd.classList.remove('active');
-        }
-      }, 4000);
-    },
-
     close() {
       const iframe = document.getElementById('cinemaIframePlayer');
       if (iframe) {
         iframe.src = '';
         iframe.style.display = 'none';
       }
-      document.querySelectorAll('.cinema-dropdown-panel').forEach(p => p.style.display = 'none');
+      SubtitleEngine.selectTrack(null);
+      document.querySelectorAll('.cinema-dropdown-panel, .cinema-episodes-panel').forEach(p => p.style.display = 'none');
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       }
