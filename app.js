@@ -623,9 +623,13 @@
         ? `https://vidsrc.to/embed/tv/${imdb}/${s}/${ep}`
         : `https://vidsrc.to/embed/movie/${imdb}`;
 
+      const vidsrcMeUrl = isSeries
+        ? `https://vidsrc.me/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}`
+        : `https://vidsrc.me/embed/movie?imdb=${imdb}`;
+
       const twoEmbedUrl = isSeries
-        ? `https://www.2embed.cc/embedtv/${imdb}&s=${s}&e=${ep}`
-        : `https://www.2embed.cc/embed/${imdb}`;
+        ? `https://www.2embed.skin/embedtv/${imdb}&s=${s}&e=${ep}`
+        : `https://www.2embed.skin/embed/${imdb}`;
 
       const smashyUrl = isSeries
         ? `https://embed.smashystream.com/playere.php?imdb=${imdb}&season=${s}&episode=${ep}`
@@ -647,10 +651,11 @@
 
       return [
         { name: `Server 1: VidSrc Pro (Full HD • Greek & Eng Subs)`, quality: '4K / 1080p', type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
-        { name: `Server 2: 2Embed HD (Multi-Audio & Subs)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
-        { name: `Server 3: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `Server 4: NontonGo Cloud Mirror (Full Cinema)`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
-        { name: `Server 5: VidSrc.pm Direct (Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
+        { name: `Server 2: VidSrc.me (Fast Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
+        { name: `Server 3: 2Embed HD (Multi-Audio & Subs)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
+        { name: `Server 4: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
+        { name: `Server 5: NontonGo Cloud Mirror (Full Cinema)`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `Server 6: VidSrc.pm Direct (Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
         { name: `📱 ExoPlayer Launcher (Android TV / Just Player)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
         { name: `📱 VLC Media Player Launcher`, quality: 'Direct App', type: 'intent', url: vlcIntent, provider: 'VLC' },
         { name: `🚀 Open in Stremio App (Torrentio/Comet)`, quality: 'P2P/Debrid', type: 'app', url: stremioDeepLink, provider: 'Stremio' },
@@ -1510,7 +1515,8 @@
     let streams = [];
 
     const vidsrcToUrl = isSeries ? `https://vidsrc.to/embed/tv/${imdb}/${s}/${ep}` : `https://vidsrc.to/embed/movie/${imdb}`;
-    const twoEmbedUrl = isSeries ? `https://www.2embed.cc/embedtv/${imdb}&s=${s}&e=${ep}` : `https://www.2embed.cc/embed/${imdb}`;
+    const vidsrcMeUrl = isSeries ? `https://vidsrc.me/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}` : `https://vidsrc.me/embed/movie?imdb=${imdb}`;
+    const twoEmbedUrl = isSeries ? `https://www.2embed.skin/embedtv/${imdb}&s=${s}&e=${ep}` : `https://www.2embed.skin/embed/${imdb}`;
     const smashyUrl = isSeries ? `https://embed.smashystream.com/playere.php?imdb=${imdb}&season=${s}&episode=${ep}` : `https://embed.smashystream.com/playere.php?imdb=${imdb}`;
     const nontonGoUrl = isSeries ? `https://www.nontongo.win/embed/tv/${imdb}/${s}/${ep}` : `https://www.nontongo.win/embed/movie/${imdb}`;
     const vidsrcPmUrl = isSeries ? `https://vidsrc.pm/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}` : `https://vidsrc.pm/embed/movie?imdb=${imdb}`;
@@ -1521,10 +1527,11 @@
     if (provider === 'servers') {
       streams = [
         { name: `${item.title} — Server 1: VidSrc Pro (Full Movie/Show • 4K/1080p)`, quality: '4K / 1080p', size: 'Full Stream', seeders: 3200, type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
-        { name: `${item.title} — Server 2: 2Embed HD (Multi-Audio & Greek/Eng Subs)`, quality: '1080p FHD', size: 'Full Stream', seeders: 2400, type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
-        { name: `${item.title} — Server 3: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', size: 'Full Stream', seeders: 1950, type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `${item.title} — Server 4: NontonGo Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1600, type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
-        { name: `${item.title} — Server 5: VidSrc.pm Direct Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1300, type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
+        { name: `${item.title} — Server 2: VidSrc.me (Fast Cloud Stream)`, quality: '1080p FHD', size: 'Full Stream', seeders: 2800, type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
+        { name: `${item.title} — Server 3: 2Embed HD (Multi-Audio & Greek/Eng Subs)`, quality: '1080p FHD', size: 'Full Stream', seeders: 2400, type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
+        { name: `${item.title} — Server 4: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', size: 'Full Stream', seeders: 1950, type: 'embed', url: smashyUrl, provider: 'Smashy' },
+        { name: `${item.title} — Server 5: NontonGo Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1600, type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `${item.title} — Server 6: VidSrc.pm Direct Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1300, type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
         { name: `${item.title} — 🌐 Open Full Stream in New Tab (Bypass Browser Frame)`, quality: 'Direct Tab', size: 'Browser View', seeders: 9999, type: 'newtab', url: vidsrcToUrl, provider: 'New Tab' }
       ];
     } else if (provider === 'apps') {
