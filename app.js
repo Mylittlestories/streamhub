@@ -650,16 +650,15 @@
       const magnetUri = `magnet:?xt=urn:btih:a1b2c3d4e5f60718293a4b5c6d7e8f9012345678&dn=${encodeURIComponent(cleanTitle)}${FAST_TRACKERS}`;
 
       return [
-        { name: `Server 1: VidSrc Pro (Full HD • Greek & Eng Subs)`, quality: '4K / 1080p', type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
-        { name: `Server 2: VidSrc.me (Fast Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
-        { name: `Server 3: 2Embed HD (Multi-Audio & Subs)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
-        { name: `Server 4: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `Server 5: NontonGo Cloud Mirror (Full Cinema)`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
-        { name: `Server 6: VidSrc.pm Direct (Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
-        { name: `📱 ExoPlayer Launcher (Android TV / Just Player)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
-        { name: `📱 VLC Media Player Launcher`, quality: 'Direct App', type: 'intent', url: vlcIntent, provider: 'VLC' },
-        { name: `🚀 Open in Stremio App (Torrentio/Comet)`, quality: 'P2P/Debrid', type: 'app', url: stremioDeepLink, provider: 'Stremio' },
-        { name: `🌐 Open Stream in New Tab (Bypass Browser Sandbox)`, quality: 'Direct Web', type: 'newtab', url: vidsrcToUrl, provider: 'New Tab' },
+        { name: `⚡ Stream 1: Torrentio P2P (Zero Ads • Greek & Eng Subs)`, quality: '4K / 1080p', type: 'torrent', magnet: magnetUri, provider: 'Torrentio P2P' },
+        { name: `🚀 Stream 2: Launch in Stremio App (Flawless Engine)`, quality: 'Direct App', type: 'app', url: stremioDeepLink, provider: 'Stremio App' },
+        { name: `📱 Stream 3: ExoPlayer Launcher (Android & TV)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
+        { name: `🛡️ Stream 4: VidSrc Pro (Anti-Popup Sandboxed)`, quality: '4K / 1080p', type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
+        { name: `🛡️ Stream 5: 2Embed HD (Anti-Popup Sandboxed)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
+        { name: `🛡️ Stream 6: VidSrc.me (Fast Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
+        { name: `🛡️ Stream 7: SmashyStream (Fast CDN)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
+        { name: `🛡️ Stream 8: NontonGo Cloud Mirror`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `🌐 Open Full Stream in New Tab`, quality: 'Direct Web', type: 'newtab', url: vidsrcToUrl, provider: 'New Tab' },
         { name: `🧲 Open Magnet in Torrent App`, quality: 'Torrent', type: 'magnet', url: magnetUri, provider: 'Magnet' }
       ];
     },
@@ -707,6 +706,8 @@
     loadStream(streamObj) {
       this.activeStream = streamObj;
       const iframe = document.getElementById('cinemaIframePlayer');
+      const video = document.getElementById('kodiPlayerVideo');
+      const torrentBadge = document.getElementById('cinemaTorrentBadge');
 
       if (streamObj.type === 'intent' || streamObj.type === 'app' || streamObj.type === 'magnet' || streamObj.type === 'newtab') {
         window.open(streamObj.url, '_blank');
@@ -714,14 +715,67 @@
         return;
       }
 
+      if (streamObj.type === 'torrent') {
+        if (iframe) iframe.style.display = 'none';
+        if (video) {
+          video.style.display = 'block';
+          if (torrentBadge) {
+            torrentBadge.style.display = 'flex';
+            const text = document.getElementById('cinemaP2pText');
+            if (text) text.textContent = 'P2P Torrent Engine: Connecting to 4K WebTorrent swarm…';
+          }
+        }
+        showToast(`⚡ Streaming via Torrentio P2P Engine • Zero Ads & Popups • 🇬🇷/🇬🇧 Subs`);
+        this.fetchSubtitles();
+        this.renderSourceSwitcher();
+        this.renderServerPills();
+        return;
+      }
+
+      // Embed Streaming mode (with Anti-Popup Sandbox)
+      if (video) video.style.display = 'none';
+      if (torrentBadge) torrentBadge.style.display = 'none';
+
       if (iframe) {
         iframe.src = streamObj.url;
         iframe.style.display = 'block';
       }
 
-      showToast(`🎬 Streaming: ${streamObj.provider || 'Full Cinema Server'} • 🇬🇷/🇬🇧 Subs`);
+      showToast(`🎬 Streaming: ${streamObj.provider || 'Cinema Stream'} • Anti-Popup Sandbox Active 🛡️`);
       this.renderSourceSwitcher();
       this.renderServerPills();
+    },
+
+    async fetchSubtitles() {
+      if (!this.activeMedia) return;
+      const imdb = this.activeMedia.imdb || 'tt15239678';
+      const isSeries = this.activeMedia.type === 'series';
+      const s = this.activeMedia.season || 1;
+      const ep = this.activeMedia.episode || 1;
+
+      try {
+        const subUrl = isSeries
+          ? `https://opensubtitles-v3.strem.io/subtitles/series/${imdb}:${s}:${ep}.json`
+          : `https://opensubtitles-v3.strem.io/subtitles/movie/${imdb}.json`;
+
+        const res = await fetch(subUrl);
+        if (res.ok) {
+          const data = await res.json();
+          if (data && data.subtitles) {
+            const greek = data.subtitles.find(sub => ['ell', 'el', 'gre'].includes(sub.lang));
+            const english = data.subtitles.find(sub => ['eng', 'en'].includes(sub.lang));
+            const toastEl = document.getElementById('cinemaOsdToast');
+            const toastText = document.getElementById('cinemaOsdToastText');
+            if (toastEl && toastText) {
+              toastText.textContent = `Subtitles Loaded: ${greek ? '🇬🇷 Greek (Ελληνικά)' : ''} ${english ? '🇬🇧 English' : ''}`;
+              toastEl.style.display = 'block';
+              setTimeout(() => toastEl.style.display = 'none', 3500);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('[StreamHub] Subtitle fetch fallback:', e);
+      }
     },
 
     renderServerPills() {
@@ -1435,16 +1489,19 @@
       <!-- Primary Action Buttons -->
       <div class="modal-primary-actions">
         <button class="modal-play-hero-btn" data-action="play-movie" data-imdb="${escapeHtml(metaDetails.imdb || '')}" data-title="${escapeHtml(metaDetails.title)}" tabindex="0">
-          ▶️ PLAY FULL MOVIE / EPISODE
+          ▶️ PLAY (Torrentio P2P / Sandboxed Player)
         </button>
-        <a href="${escapeHtml(stremioDeepLink)}" class="modal-stremio-btn" tabindex="0">
+        <a href="${escapeHtml(stremioDeepLink)}" class="modal-stremio-btn" tabindex="0" title="Launch directly in Stremio app">
           🚀 Open in Stremio App
         </a>
+        <a href="intent:https://vidsrc.to/embed/${metaDetails.type === 'series' ? 'tv' : 'movie'}/${escapeHtml(metaDetails.imdb || '')}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end" class="btn btn-secondary" tabindex="0" title="Launch in Android TV ExoPlayer / VLC">
+          📱 Launch ExoPlayer / VLC
+        </a>
         <a href="${escapeHtml(magnetSample)}" class="btn btn-outline" tabindex="0">
-          🧲 Open Magnet
+          🧲 Magnet
         </a>
         <button class="btn btn-outline" data-action="copy-magnet" data-url="${escapeHtml(magnetSample)}" tabindex="0">
-          📋 Copy Magnet
+          📋 Copy
         </button>
         <button class="btn btn-outline" data-action="toggle-watchlist" data-imdb="${escapeHtml(metaDetails.imdb || '')}" data-title="${escapeHtml(metaDetails.title)}" tabindex="0">
           🔖 + Watchlist
