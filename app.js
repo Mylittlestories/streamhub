@@ -1,7 +1,7 @@
 /**
- * StreamHub Pro — Master Application Logic & Cinema Player Engine
- * Universal Stremio/Kodi Media Center for Torrentio, YTS/YIFY, EZTV, Comet, and Free Legal Cinema
- * Features: Live Cinemeta/YTS Auto-Sync, 1M+ Search, Greek (Ελληνικά) & English Subtitles, By-Year Timeline, Real Full Movie Streams, TV Mode
+ * StreamHub Pro — Universal Cinema & Series Streaming Engine
+ * Multi-Server Real Video Streamers (VidSrc, 2Embed, SmashyStream, NontonGo, ExoPlayer Intent, Stremio, Torrentio)
+ * Features: Live Cinemeta/YTS Auto-Sync, 1M+ Search, Greek (Ελληνικά) & English Subtitles, By-Year Timeline, TV Remote Engine
  */
 
 (function () {
@@ -12,16 +12,16 @@
   // =========================================================================
 
   const STORAGE_KEYS = {
-    BOOKMARKS: 'streamhub_bookmarks_v4',
-    WATCHLIST: 'streamhub_watchlist_v4',
-    SHOWS: 'streamhub_shows_v4',
-    MARATHON: 'streamhub_marathon_v4',
-    RELEASES: 'streamhub_releases_v4',
-    SETTINGS: 'streamhub_settings_v4',
-    TV_MODE: 'streamhub_tv_mode_v4',
-    PLAYBACK_POS: 'streamhub_playback_positions_v4',
-    DYNAMIC_CATALOG: 'streamhub_dynamic_catalog_v4',
-    LAST_SYNC: 'streamhub_last_sync_v4'
+    BOOKMARKS: 'streamhub_bookmarks_v5',
+    WATCHLIST: 'streamhub_watchlist_v5',
+    SHOWS: 'streamhub_shows_v5',
+    MARATHON: 'streamhub_marathon_v5',
+    RELEASES: 'streamhub_releases_v5',
+    SETTINGS: 'streamhub_settings_v5',
+    TV_MODE: 'streamhub_tv_mode_v5',
+    PLAYBACK_POS: 'streamhub_playback_positions_v5',
+    DYNAMIC_CATALOG: 'streamhub_dynamic_catalog_v5',
+    LAST_SYNC: 'streamhub_last_sync_v5'
   };
 
   const DEFAULT_SETTINGS = {
@@ -35,14 +35,6 @@
     torrentioUrl: 'https://torrentio.strem.fun',
     cometUrl: 'https://comet.elfhosted.com',
     defaultPlayer: 'embedded'
-  };
-
-  // Direct fallback video streams
-  const WORKING_STREAMS = {
-    mp4_ocean: 'https://vjs.zencdn.net/v/oceans.mp4',
-    mp4_sintel: 'https://media.w3.org/2010/05/sintel/trailer.mp4',
-    mp4_bunny: 'https://media.w3.org/2010/05/bunny/trailer.mp4',
-    hls_mux: 'https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8'
   };
 
   const DEFAULT_PLATFORMS = [
@@ -70,11 +62,11 @@
   ];
 
   const DEFAULT_WATCHLIST = [
-    { id: 'w1', title: 'Dune: Part Two', platform: 'Torrentio / 4K', genre: 'Sci-Fi/Fantasy', runtime: 166, status: 'watching', rating: 5, notes: 'Stunning visuals in 4K HDR', imdb: 'tt15239678' },
-    { id: 'w2', title: 'Oppenheimer', platform: 'YTS / 4K', genre: 'Drama', runtime: 180, status: 'watched', rating: 5, notes: 'Masterpiece direction', imdb: 'tt15398776' },
-    { id: 'w3', title: 'House of the Dragon', platform: 'EZTV / 1080p', genre: 'Sci-Fi/Fantasy', runtime: 65, status: 'watching', rating: 4, notes: 'Season 2 in progress', imdb: 'tt11198330' },
-    { id: 'w4', title: 'Interstellar', platform: 'Torrentio', genre: 'Sci-Fi/Fantasy', runtime: 169, status: 'watched', rating: 5, notes: 'All-time favorite', imdb: 'tt0816692' },
-    { id: 'w5', title: 'Breaking Bad', platform: 'Torrentio', genre: 'Crime/Mystery', runtime: 49, status: 'watched', rating: 5, notes: 'Legendary TV series', imdb: 'tt0903747' },
+    { id: 'w1', title: 'Dune: Part Two', platform: 'Server 1 / 4K', genre: 'Sci-Fi, Adventure', runtime: 166, status: 'watching', rating: 5, notes: 'Stunning visuals in 4K HDR', imdb: 'tt15239678' },
+    { id: 'w2', title: 'Oppenheimer', platform: 'Server 1 / 4K', genre: 'Biography, Drama', runtime: 180, status: 'watched', rating: 5, notes: 'Masterpiece direction', imdb: 'tt15398776' },
+    { id: 'w3', title: 'House of the Dragon', platform: 'Server 1 / 1080p', genre: 'Action, Drama', runtime: 65, status: 'watching', rating: 4, notes: 'Season 2 in progress', imdb: 'tt11198330' },
+    { id: 'w4', title: 'Interstellar', platform: 'Server 1 / 4K', genre: 'Sci-Fi, Adventure', runtime: 169, status: 'watched', rating: 5, notes: 'All-time favorite', imdb: 'tt0816692' },
+    { id: 'w5', title: 'Breaking Bad', platform: 'Server 1 / 1080p', genre: 'Crime, Drama', runtime: 49, status: 'watched', rating: 5, notes: 'Legendary TV series', imdb: 'tt0903747' },
     { id: 'w6', title: 'Night of the Living Dead', platform: 'Internet Archive', genre: 'Horror', runtime: 96, status: 'towatch', rating: 0, notes: 'Public domain horror classic', imdb: 'tt0063350' }
   ];
 
@@ -94,49 +86,27 @@
 
   // Curated Multi-Decade Seed Catalog (with real IMDb IDs)
   const SEED_CATALOG = [
-    { id: 'c1', imdb: 'tt15239678', title: 'Dune: Part Two', year: 2024, type: 'movie', genre: 'Sci-Fi, Adventure', rating: 8.6, runtime: 166, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BN2QyZGUgkLWEtNzJjMi00MThkLWFmNDctYzJmNTUyMWRjM2M2XkEyXkFqcGc@._V1_SX300.jpg', desc: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c2', imdb: 'tt6263850', title: 'Deadpool & Wolverine', year: 2024, type: 'movie', genre: 'Action, Comedy, Sci-Fi', rating: 7.8, runtime: 128, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BNzRiMjg0MzUtNTQ1Mi00Y2Q5LWEwM2MtMzUwZDU5NmVjN2NkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Wolverine is recovering when he crosses paths with the mouthy Deadpool to defeat a common enemy.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c3', imdb: 'tt15398776', title: 'Oppenheimer', year: 2023, type: 'movie', genre: 'Biography, Drama, History', rating: 8.9, runtime: 180, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BN2JkMDc5MGQtZmVhMy00ZGE3LWE5NDQtZTMxM2Y5ODliZTQzXkEyXkFqcGc@._V1_SX300.jpg', desc: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c4', imdb: 'tt0816692', title: 'Interstellar', year: 2014, type: 'movie', genre: 'Sci-Fi, Adventure, Drama', rating: 8.7, runtime: 169, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_SX300.jpg', desc: 'When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot is tasked to pilot a spacecraft to find a new home.', sources: ['Torrentio', 'YTS', 'Comet', 'Tubi'] },
-    { id: 'c5', imdb: 'tt11198330', title: 'House of the Dragon', year: 2024, type: 'series', genre: 'Action, Adventure, Drama', rating: 8.4, runtime: 60, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BM2QzMGVkNjUtN2Y4Ni00ODgwLTlmYzktYzY2MGIwMmE1NmNkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'An internal succession war within House Targaryen at the height of its power, 172 years before the birth of Daenerys Targaryen.', sources: ['Torrentio', 'EZTV', 'Comet'], season: 2, episode: 1 },
-    { id: 'c6', imdb: 'tt4574334', title: 'Stranger Things', year: 2024, type: 'series', genre: 'Drama, Fantasy, Horror', rating: 8.7, runtime: 55, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BMDZkYmVhNjMtNWU4MC00MDQxLWE3YTgtZTZlN2RmODlmZTNmXkEyXkFqcGc@._V1_SX300.jpg', desc: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments and terrifying supernatural forces.', sources: ['Torrentio', 'EZTV', 'Comet'], season: 4, episode: 1 },
-    { id: 'c7', imdb: 'tt0903747', title: 'Breaking Bad', year: 2013, type: 'series', genre: 'Crime, Drama, Thriller', rating: 9.5, runtime: 49, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BMzU5ZGYzNmQtMTdhYy00OGRiLTg0NmQtYjVjNzliZTg1ZGE4XkEyXkFqcGc@._V1_SX300.jpg', desc: 'A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.', sources: ['Torrentio', 'EZTV', 'Comet'], season: 1, episode: 1 },
-    { id: 'c8', imdb: 'tt1877830', title: 'The Batman', year: 2022, type: 'movie', genre: 'Action, Crime, Drama', rating: 7.8, runtime: 176, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BM2MyNTAwZGEtNTAxNC00ODVjLTgzOTYtYmVmOWVmOWIzMDE4XkEyXkFqcGc@._V1_SX300.jpg', desc: 'When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c9', imdb: 'tt2560140', title: 'Attack on Titan', year: 2023, type: 'series', genre: 'Animation, Action, Adventure', rating: 9.1, runtime: 24, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BNzc5MTczNDQtNDFjNi00ZDU5LWFkNzItOTE1NzQzMzdhNzMxXkEyXkFqcGc@._V1_SX300.jpg', desc: 'After his hometown is destroyed, Eren Jaeger vows to cleanse the earth of the giant humanoid Titans.', sources: ['Torrentio', 'EZTV'] },
-    { id: 'c10', imdb: 'tt0111161', title: 'The Shawshank Redemption', year: 1994, type: 'movie', genre: 'Drama', rating: 9.3, runtime: 142, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2NDExXkEyXkFqcGc@._V1_SX300.jpg', desc: 'A banker convicted of uxoricide forms a friendship with a fellow inmate over the course of several years.', sources: ['Torrentio', 'YTS', 'Tubi'] },
-    { id: 'c11', imdb: 'tt0063350', title: 'Night of the Living Dead', year: 1968, type: 'movie', genre: 'Horror', rating: 7.8, runtime: 96, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BMTg0ODkzMDU1Nl5BMl5BanBnXkFtZTgwNjkyMzI1MzE@._V1_SX300.jpg', desc: 'George A. Romero’s legendary public-domain zombie masterpiece.', sources: ['Internet Archive', 'Tubi', 'Pluto TV', 'Torrentio'] },
-    { id: 'c12', imdb: 'tt0018578', title: 'Metropolis', year: 1927, type: 'movie', genre: 'Drama, Sci-Fi', rating: 8.3, runtime: 153, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BMmExYTUyN2YtMjFiNS00MGFlLWI2ODQtNzExNzM4MzJjMjljXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Fritz Lang’s iconic dystopian sci-fi cinema milestone.', sources: ['Internet Archive', 'Kanopy', 'Pluto TV'] },
-    { id: 'c13', imdb: 'tt1190634', title: 'The Boys', year: 2024, type: 'series', genre: 'Action, Comedy, Drama', rating: 8.7, runtime: 60, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BYzA2Nzk5M2EtNWY4Yi00ZDY4LThkZTgtYjhhNmM4YT краси@._V1_SX300.jpg', desc: 'A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers.', sources: ['Torrentio', 'EZTV', 'Comet'], season: 4, episode: 1 },
-    { id: 'c14', imdb: 'tt1375666', title: 'Inception', year: 2010, type: 'movie', genre: 'Action, Adventure, Sci-Fi', rating: 8.8, runtime: 148, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg', desc: 'A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c15', imdb: 'tt0468569', title: 'The Dark Knight', year: 2008, type: 'movie', genre: 'Action, Crime, Drama', rating: 9.0, runtime: 152, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg', desc: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest tests.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c16', imdb: 'tt1757678', title: 'Avatar: Fire and Ash', year: 2025, type: 'movie', genre: 'Action, Adventure, Fantasy', rating: 8.5, runtime: 190, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BYzY3NGRmODMtYWIyMi00YjBhLWJjMzktMTk4NzMxN2NmNTY0XkEyXkFqcGc@._V1_SX300.jpg', desc: 'The third installment in James Cameron’s epic Avatar saga exploring the Ash People on Pandora.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c17', imdb: 'tt27165187', title: 'The End of Oak Street', year: 2026, type: 'movie', genre: 'Action, Adventure, Mystery', rating: 7.9, runtime: 135, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BMjA5NzU5MjU0NF5BMl5BanBnXkFtZTgwNTI1MjE2ODE@._V1_SX300.jpg', desc: 'A suburban family unites to navigate unknown surroundings after a cosmic event transports their neighborhood.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c18', imdb: 'tt33539520', title: 'Neagley', year: 2026, type: 'series', genre: 'Action, Crime, Drama', rating: 8.3, runtime: 50, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BMzRiMjg0MzUtNTQ1Mi00Y2Q5LWEwM2MtMzUwZDU5NmVjN2NkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Neagley, drawing from her experience with Jack Reacher and the 110 Special Investigators, embarks on a mission to expose a sinister threat.', sources: ['Torrentio', 'EZTV', 'Comet'], season: 1, episode: 1 },
-    { id: 'c19', imdb: 'tt9362722', title: 'Spider-Man: Across the Spider-Verse', year: 2023, type: 'movie', genre: 'Animation, Action, Adventure', rating: 8.7, runtime: 140, quality: '4K', poster: 'https://m.media-amazon.com/images/M/MV5BNzQ0Mzk1ODEtY2VkMy00OWUzLThkOTktMWVlOTQxMDM4MjA1XkEyXkFqcGc@._V1_SX300.jpg', desc: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its existence.', sources: ['Torrentio', 'YTS', 'Comet'] },
-    { id: 'c20', imdb: 'tt0109830', title: 'Forrest Gump', year: 1994, type: 'movie', genre: 'Drama, Romance', rating: 8.8, runtime: 142, quality: '1080p', poster: 'https://m.media-amazon.com/images/M/MV5BNDYwNzVjMTItZmU5YS00YjQ5LTljYjgtMjY2NDVmYWMyNWFmXkEyXkFqcGc@._V1_SX300.jpg', desc: 'The history of the United States from the 1950s to the 70s unfolds through the perspective of an Alabama man with an IQ of 75.', sources: ['Torrentio', 'YTS', 'Tubi'] }
+    { id: 'c1', imdb: 'tt15239678', title: 'Dune: Part Two', year: 2024, type: 'movie', genre: 'Sci-Fi, Adventure', rating: 8.6, runtime: 166, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BN2QyZGUgkLWEtNzJjMi00MThkLWFmNDctYzJmNTUyMWRjM2M2XkEyXkFqcGc@._V1_SX300.jpg', desc: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c2', imdb: 'tt6263850', title: 'Deadpool & Wolverine', year: 2024, type: 'movie', genre: 'Action, Comedy, Sci-Fi', rating: 7.8, runtime: 128, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BNzRiMjg0MzUtNTQ1Mi00Y2Q5LWEwM2MtMzUwZDU5NmVjN2NkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Wolverine is recovering when he crosses paths with the mouthy Deadpool to defeat a common enemy.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c3', imdb: 'tt15398776', title: 'Oppenheimer', year: 2023, type: 'movie', genre: 'Biography, Drama, History', rating: 8.9, runtime: 180, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BN2JkMDc5MGQtZmVhMy00ZGE3LWE5NDQtZTMxM2Y5ODliZTQzXkEyXkFqcGc@._V1_SX300.jpg', desc: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c4', imdb: 'tt0816692', title: 'Interstellar', year: 2014, type: 'movie', genre: 'Sci-Fi, Adventure, Drama', rating: 8.7, runtime: 169, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_SX300.jpg', desc: 'When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot is tasked to pilot a spacecraft to find a new home.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c5', imdb: 'tt11198330', title: 'House of the Dragon', year: 2024, type: 'series', genre: 'Action, Adventure, Drama', rating: 8.4, runtime: 60, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BM2QzMGVkNjUtN2Y4Ni00ODgwLTlmYzktYzY2MGIwMmE1NmNkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'An internal succession war within House Targaryen at the height of its power, 172 years before the birth of Daenerys Targaryen.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 2, episode: 1 },
+    { id: 'c6', imdb: 'tt4574334', title: 'Stranger Things', year: 2024, type: 'series', genre: 'Drama, Fantasy, Horror', rating: 8.7, runtime: 55, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMDZkYmVhNjMtNWU4MC00MDQxLWE3YTgtZTZlN2RmODlmZTNmXkEyXkFqcGc@._V1_SX300.jpg', desc: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments and terrifying supernatural forces.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 4, episode: 1 },
+    { id: 'c7', imdb: 'tt0903747', title: 'Breaking Bad', year: 2013, type: 'series', genre: 'Crime, Drama, Thriller', rating: 9.5, runtime: 49, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMzU5ZGYzNmQtMTdhYy00OGRiLTg0NmQtYjVjNzliZTg1ZGE4XkEyXkFqcGc@._V1_SX300.jpg', desc: 'A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 1, episode: 1 },
+    { id: 'c8', imdb: 'tt1877830', title: 'The Batman', year: 2022, type: 'movie', genre: 'Action, Crime, Drama', rating: 7.8, runtime: 176, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BM2MyNTAwZGEtNTAxNC00ODVjLTgzOTYtYmVmOWVmOWIzMDE4XkEyXkFqcGc@._V1_SX300.jpg', desc: 'When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c9', imdb: 'tt2560140', title: 'Attack on Titan', year: 2023, type: 'series', genre: 'Animation, Action, Adventure', rating: 9.1, runtime: 24, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BNzc5MTczNDQtNDFjNi00ZDU5LWFkNzItOTE1NzQzMzdhNzMxXkEyXkFqcGc@._V1_SX300.jpg', desc: 'After his hometown is destroyed, Eren Jaeger vows to cleanse the earth of the giant humanoid Titans.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV'] },
+    { id: 'c10', imdb: 'tt0111161', title: 'The Shawshank Redemption', year: 1994, type: 'movie', genre: 'Drama', rating: 9.3, runtime: 142, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2NDExXkEyXkFqcGc@._V1_SX300.jpg', desc: 'A banker convicted of uxoricide forms a friendship with a fellow inmate over the course of several years.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c11', imdb: 'tt0063350', title: 'Night of the Living Dead', year: 1968, type: 'movie', genre: 'Horror', rating: 7.8, runtime: 96, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMTg0ODkzMDU1Nl5BMl5BanBnXkFtZTgwNjkyMzI1MzE@._V1_SX300.jpg', desc: 'George A. Romero’s legendary public-domain zombie masterpiece.', sources: ['Internet Archive', 'VidSrc', 'Tubi', 'Pluto TV'] },
+    { id: 'c12', imdb: 'tt0018578', title: 'Metropolis', year: 1927, type: 'movie', genre: 'Drama, Sci-Fi', rating: 8.3, runtime: 153, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMmExYTUyN2YtMjFiNS00MGFlLWI2ODQtNzExNzM4MzJjMjljXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Fritz Lang’s iconic dystopian sci-fi cinema milestone.', sources: ['Internet Archive', 'VidSrc', 'Kanopy'] },
+    { id: 'c13', imdb: 'tt1190634', title: 'The Boys', year: 2024, type: 'series', genre: 'Action, Comedy, Drama', rating: 8.7, runtime: 60, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BYzA2Nzk5M2EtNWY4Yi00ZDY4LThkZTgtYjhhNmM4YT краси@._V1_SX300.jpg', desc: 'A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 4, episode: 1 },
+    { id: 'c14', imdb: 'tt1375666', title: 'Inception', year: 2010, type: 'movie', genre: 'Action, Adventure, Sci-Fi', rating: 8.8, runtime: 148, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg', desc: 'A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c15', imdb: 'tt0468569', title: 'The Dark Knight', year: 2008, type: 'movie', genre: 'Action, Crime, Drama', rating: 9.0, runtime: 152, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg', desc: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest tests.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c16', imdb: 'tt1757678', title: 'Avatar: Fire and Ash', year: 2025, type: 'movie', genre: 'Action, Adventure, Fantasy', rating: 8.5, runtime: 190, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BYzY3NGRmODMtYWIyMi00YjBhLWJjMzktMTk4NzMxN2NmNTY0XkEyXkFqcGc@._V1_SX300.jpg', desc: 'The third installment in James Cameron’s epic Avatar saga exploring the Ash People on Pandora.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c17', imdb: 'tt27165187', title: 'The End of Oak Street', year: 2026, type: 'movie', genre: 'Action, Adventure, Mystery', rating: 7.9, runtime: 135, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BMjA5NzU5MjU0NF5BMl5BanBnXkFtZTgwNTI1MjE2ODE@._V1_SX300.jpg', desc: 'A suburban family unites to navigate unknown surroundings after a cosmic event transports their neighborhood.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c18', imdb: 'tt33539520', title: 'Neagley', year: 2026, type: 'series', genre: 'Action, Crime, Drama', rating: 8.3, runtime: 50, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMzRiMjg0MzUtNTQ1Mi00Y2Q5LWEwM2MtMzUwZDU5NmVjN2NkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Neagley, drawing from her experience with Jack Reacher and the 110 Special Investigators, embarks on a mission to expose a sinister threat.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 1, episode: 1 },
+    { id: 'c19', imdb: 'tt9362722', title: 'Spider-Man: Across the Spider-Verse', year: 2023, type: 'movie', genre: 'Animation, Action, Adventure', rating: 8.7, runtime: 140, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BNzQ0Mzk1ODEtY2VkMy00OWUzLThkOTktMWVlOTQxMDM4MjA1XkEyXkFqcGc@._V1_SX300.jpg', desc: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its existence.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
+    { id: 'c20', imdb: 'tt0109830', title: 'Forrest Gump', year: 1994, type: 'movie', genre: 'Drama, Romance', rating: 8.8, runtime: 142, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BNDYwNzVjMTItZmU5YS00YjQ5LTljYjgtMjY2NDVmYWMyNWFmXkEyXkFqcGc@._V1_SX300.jpg', desc: 'The history of the United States from the 1950s to the 70s unfolds through the perspective of an Alabama man with an IQ of 75.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] }
   ];
-
-  // Greek & English Real-Time Subtitle Cues
-  const SUBTITLE_CUES = {
-    el: [
-      { start: 0, end: 4, text: "🇬🇷 [Υπότιτλοι: Ελληνικά]" },
-      { start: 4, end: 9, text: "Καλώς ήρθατε στο StreamHub Pro — Cinema Player" },
-      { start: 9, end: 15, text: "Υψηλή ποιότητα εικόνας σε ανάλυση 4K UHD με πολυκάναλο ήχο." },
-      { start: 15, end: 22, text: "Ροή από Torrentio, YTS, EZTV και Comet σε πραγματικό χρόνο." },
-      { start: 22, end: 35, text: "Απολαύστε την προβολή στην τηλεόραση, το κινητό ή τον υπολογιστή σας." },
-      { start: 35, end: 60, text: "Ελληνικοί υπότιτλοι συγχρονισμένοι αυτόματα." },
-      { start: 60, end: 120, text: "Συνεχίστε την προβολή απρόσκοπτα από εκεί που μείνατε." }
-    ],
-    en: [
-      { start: 0, end: 4, text: "🇬🇧 [Subtitles: English]" },
-      { start: 4, end: 9, text: "Welcome to StreamHub Pro — Cinema Edition" },
-      { start: 9, end: 15, text: "High definition 4K Ultra HD video playback with multi-audio support." },
-      { start: 15, end: 22, text: "Seamless Torrentio, YTS, EZTV & Comet playback in embedded player." },
-      { start: 22, end: 35, text: "Enjoy streaming across Smart TV, Android phone, and Desktop PC." },
-      { start: 35, end: 60, text: "Subtitles synchronized in real-time." },
-      { start: 60, end: 120, text: "Auto-resume and playlist tracking active." }
-    ]
-  };
 
   const FAST_TRACKERS = [
     'udp://tracker.opentrackr.org:1337/announce',
@@ -455,7 +425,7 @@
                   desc: meta.description || 'Watch full movie stream with Greek & English subtitles.',
                   cast: meta.cast || [],
                   director: meta.director || [],
-                  sources: meta.type === 'series' ? ['Torrentio', 'EZTV', 'Comet'] : ['Torrentio', 'YTS', 'Comet', 'Free Legal']
+                  sources: ['VidSrc', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio']
                 };
 
                 if (!State.catalogMap.has(imdbId)) {
@@ -538,7 +508,7 @@
                 quality: '4K / 1080p',
                 poster: meta.poster || 'icons/icon-192.png',
                 desc: meta.description || 'Full media stream with Greek & English subtitles.',
-                sources: ['Torrentio', 'YTS', 'EZTV', 'Comet']
+                sources: ['VidSrc', '2Embed', 'SmashyStream', 'NontonGo']
               };
 
               if (!State.catalogMap.has(imdbId)) {
@@ -578,101 +548,27 @@
 
   const CinemaPlayer = {
     overlay: null,
-    video: null,
     iframe: null,
     osd: null,
-    subBox: null,
-    tapOverlay: null,
-    hls: null,
-    webtorrent: null,
-    currentTorrent: null,
     activeMedia: null,
     activeStream: null,
     availableStreams: [],
     osdHideTimer: null,
-    volume: 1.0,
-    aspectModes: ['contain', 'aspect-fill', 'aspect-stretch', 'aspect-219'],
-    currentAspectIdx: 0,
-    speedRates: [0.5, 0.75, 1.0, 1.25, 1.5, 2.0],
-    currentSpeedIdx: 2,
-    subtitlesEnabled: true,
-    currentSubLang: 'el', // 'el' = Greek, 'en' = English, 'none' = Off
-    subDelay: 0.0,
-    subSize: 'sub-large',
-    customSubCues: null,
-    upNextTimer: null,
 
     init() {
       this.overlay = document.getElementById('cinemaPlayer');
-      this.video = document.getElementById('kodiPlayerVideo');
       this.iframe = document.getElementById('cinemaIframePlayer');
       this.osd = document.getElementById('cinemaOsd');
-      this.subBox = document.getElementById('cinemaSubtitleBox');
-      this.tapOverlay = document.getElementById('cinemaTapOverlay');
 
-      if (!this.overlay) return;
-
-      this.currentSubLang = State.settings.defaultSubLanguage || 'el';
-      this.subSize = State.settings.defaultSubSize || 'sub-large';
-      if (this.subBox) {
-        this.subBox.className = `cinema-subtitle-box ${this.subSize}`;
-      }
+      if (!this.overlay || !this.iframe) return;
 
       this.bindEvents();
     },
 
     bindEvents() {
-      const v = this.video;
-
-      if (v) {
-        v.addEventListener('timeupdate', () => {
-          this.onTimeUpdate();
-          this.renderSubtitleCue();
-        });
-        v.addEventListener('progress', () => this.onProgress());
-        v.addEventListener('play', () => {
-          this.onPlayStateChange(true);
-          if (this.tapOverlay) this.tapOverlay.style.display = 'none';
-        });
-        v.addEventListener('pause', () => this.onPlayStateChange(false));
-        v.addEventListener('ended', () => this.onEnded());
-        v.addEventListener('loadedmetadata', () => this.onMetadataLoaded());
-        v.addEventListener('error', (e) => {
-          console.warn('[CinemaPlayer] Video error event, trying fallback:', e);
-          if (v.src !== WORKING_STREAMS.mp4_ocean) {
-            v.src = WORKING_STREAMS.mp4_ocean;
-            v.play().catch(() => {});
-          }
-        });
-      }
-
       this.overlay.addEventListener('mousemove', () => this.wakeOsd());
-      this.overlay.addEventListener('click', (e) => {
-        if (e.target === this.video || e.target === document.getElementById('cinemaVideoSurface') || e.target === this.tapOverlay || e.target.closest('.video-tap-btn')) {
-          this.togglePlay();
-        }
-        this.wakeOsd();
-      });
-
-      if (this.tapOverlay) {
-        this.tapOverlay.addEventListener('click', () => this.togglePlay());
-      }
 
       document.getElementById('cinemaCloseBtn')?.addEventListener('click', () => this.close());
-      document.getElementById('cinemaPlayPauseBtn')?.addEventListener('click', () => this.togglePlay());
-      document.getElementById('cinemaSeekBackBtn')?.addEventListener('click', () => this.seek(-10));
-      document.getElementById('cinemaSeekFwdBtn')?.addEventListener('click', () => this.seek(10));
-      document.getElementById('cinemaNextEpBtn')?.addEventListener('click', () => this.playNextEpisode());
-      
-      document.getElementById('cinemaMuteBtn')?.addEventListener('click', () => this.toggleMute());
-      const volSlider = document.getElementById('cinemaVolumeSlider');
-      if (volSlider) {
-        volSlider.addEventListener('input', (e) => this.setVolume(parseFloat(e.target.value)));
-      }
-
-      document.getElementById('cinemaAspectBtn')?.addEventListener('click', () => this.toggleAspectRatio());
-      document.getElementById('cinemaSpeedBtn')?.addEventListener('click', () => this.toggleSpeed());
-      document.getElementById('cinemaPipBtn')?.addEventListener('click', () => this.togglePip());
       document.getElementById('cinemaFullscreenBtn')?.addEventListener('click', () => this.toggleFullscreen());
 
       document.getElementById('cinemaExternalStremioBtn')?.addEventListener('click', () => {
@@ -684,79 +580,8 @@
       });
 
       document.getElementById('cinemaSourceBtn')?.addEventListener('click', () => this.togglePanel('cinemaSourceDropdown'));
-      document.getElementById('cinemaSubtitlesBtn')?.addEventListener('click', () => this.togglePanel('cinemaSubtitlesDropdown'));
-      document.getElementById('cinemaAudioBtn')?.addEventListener('click', () => this.togglePanel('cinemaAudioDropdown'));
-
       document.getElementById('closeSourceDropdownBtn')?.addEventListener('click', () => {
         document.getElementById('cinemaSourceDropdown').style.display = 'none';
-      });
-      document.getElementById('closeSubDropdownBtn')?.addEventListener('click', () => {
-        document.getElementById('cinemaSubtitlesDropdown').style.display = 'none';
-      });
-      document.getElementById('closeAudioDropdownBtn')?.addEventListener('click', () => {
-        document.getElementById('cinemaAudioDropdown').style.display = 'none';
-      });
-
-      // Greek & English Subtitle Quick Buttons
-      document.getElementById('subLangGreekBtn')?.addEventListener('click', () => this.setSubtitleLanguage('el'));
-      document.getElementById('subLangEnglishBtn')?.addEventListener('click', () => this.setSubtitleLanguage('en'));
-      document.getElementById('subLangOffBtn')?.addEventListener('click', () => this.setSubtitleLanguage('none'));
-
-      // Subtitle Delay Buttons
-      document.getElementById('subDelayMinusBtn')?.addEventListener('click', () => this.adjustSubDelay(-0.25));
-      document.getElementById('subDelayPlusBtn')?.addEventListener('click', () => this.adjustSubDelay(+0.25));
-      document.getElementById('subDelayResetBtn')?.addEventListener('click', () => this.setSubDelay(0.0));
-
-      // Subtitle Size Buttons
-      document.getElementById('subSizeNormalBtn')?.addEventListener('click', () => this.setSubSize('sub-normal'));
-      document.getElementById('subSizeLargeBtn')?.addEventListener('click', () => this.setSubSize('sub-large'));
-      document.getElementById('subSizeXlBtn')?.addEventListener('click', () => this.setSubSize('sub-xl'));
-
-      // Custom Subtitle File Input
-      document.getElementById('customSubFileInput')?.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (file) {
-          const reader = new FileReader();
-          reader.onload = (event) => this.parseSrtSubtitle(event.target.result);
-          reader.readAsText(file);
-        }
-      });
-
-      // Timeline Scrubber
-      const timelineContainer = document.getElementById('cinemaTimelineContainer');
-      if (timelineContainer) {
-        timelineContainer.addEventListener('click', (e) => {
-          const rect = timelineContainer.getBoundingClientRect();
-          const pos = (e.clientX - rect.left) / rect.width;
-          if (this.video && this.video.duration) {
-            this.video.currentTime = pos * this.video.duration;
-            this.wakeOsd();
-          }
-        });
-
-        timelineContainer.addEventListener('mousemove', (e) => {
-          const rect = timelineContainer.getBoundingClientRect();
-          const pos = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-          const hover = document.getElementById('cinemaTimelineHover');
-          const hoverTime = document.getElementById('cinemaTimelineHoverTime');
-          if (hover && this.video && this.video.duration) {
-            hover.style.left = `${pos * 100}%`;
-            hover.style.display = 'block';
-            if (hoverTime) hoverTime.textContent = formatSeconds(pos * this.video.duration);
-          }
-        });
-
-        timelineContainer.addEventListener('mouseleave', () => {
-          const hover = document.getElementById('cinemaTimelineHover');
-          if (hover) hover.style.display = 'none';
-        });
-      }
-
-      document.getElementById('upNextPlayBtn')?.addEventListener('click', () => this.playNextEpisode());
-      document.getElementById('upNextCancelBtn')?.addEventListener('click', () => {
-        clearTimeout(this.upNextTimer);
-        const upNextCard = document.getElementById('cinemaUpNextCard');
-        if (upNextCard) upNextCard.style.display = 'none';
       });
     },
 
@@ -784,6 +609,16 @@
         ? `https://embed.smashystream.com/playere.php?imdb=${imdb}&season=${s}&episode=${ep}`
         : `https://embed.smashystream.com/playere.php?imdb=${imdb}`;
 
+      const nontonGoUrl = isSeries
+        ? `https://www.nontongo.win/embed/tv/${imdb}/${s}/${ep}`
+        : `https://www.nontongo.win/embed/movie/${imdb}`;
+
+      // Android ExoPlayer / VLC Intent URI
+      const exoIntent = isSeries
+        ? `intent:https://vidsrc.to/embed/tv/${imdb}/${s}/${ep}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`
+        : `intent:https://vidsrc.to/embed/movie/${imdb}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
+
+      const stremioDeepLink = `stremio:///detail/${isSeries ? 'series' : 'movie'}/${imdb}`;
       const magnetUri = `magnet:?xt=urn:btih:a1b2c3d4e5f60718293a4b5c6d7e8f9012345678&dn=${encodeURIComponent(cleanTitle)}${FAST_TRACKERS}`;
 
       return [
@@ -791,8 +626,10 @@
         { name: `Server 2: VidSrc.me (High Speed Cloud)`, quality: '1080p FHD', type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
         { name: `Server 3: 2Embed (Multi-Audio & Subs)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
         { name: `Server 4: SmashyStream (Ultra Fast)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `Torrentio 4K UHD Direct P2P Stream`, quality: '4K UHD', type: 'torrent', magnet: magnetUri, url: magnetUri, provider: 'Torrentio' },
-        { name: `YTS / EZTV 1080p Torrent Stream`, quality: '1080p FHD', type: 'torrent', magnet: magnetUri, url: magnetUri, provider: 'YTS/EZTV' }
+        { name: `Server 5: NontonGo Cloud (Full Cinema)`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `📱 ExoPlayer / VLC Launcher (Android & TV)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
+        { name: `🚀 Open in Stremio App (Torrentio/Comet)`, quality: 'P2P/Debrid', type: 'app', url: stremioDeepLink, provider: 'Stremio' },
+        { name: `🧲 Open Magnet in Torrent App`, quality: 'Torrent', type: 'magnet', url: magnetUri, provider: 'Magnet' }
       ];
     },
 
@@ -806,7 +643,6 @@
       const titleEl = document.getElementById('cinemaMediaTitle');
       const metaEl = document.getElementById('cinemaMediaMeta');
       const badgeEl = document.getElementById('cinemaQualityBadge');
-      const nextBtn = document.getElementById('cinemaNextEpBtn');
 
       if (titleEl) {
         let displayTitle = mediaItem.title;
@@ -824,11 +660,6 @@
         badgeEl.textContent = this.activeStream?.quality || '4K UHD';
       }
 
-      if (nextBtn) {
-        nextBtn.style.display = (mediaItem.type === 'series' || mediaItem.season) ? 'inline-flex' : 'none';
-      }
-
-      this.updateSubBadgeUI();
       this.renderSourceSwitcher();
       this.renderServerPills();
 
@@ -844,83 +675,20 @@
 
     loadStream(streamObj) {
       this.activeStream = streamObj;
-      const v = this.video;
       const iframe = document.getElementById('cinemaIframePlayer');
-      const torrentBadge = document.getElementById('cinemaTorrentBadge');
 
-      if (this.hls) {
-        this.hls.destroy();
-        this.hls = null;
-      }
-      if (this.currentTorrent) {
-        try { this.currentTorrent.destroy(); } catch (e) {}
-        this.currentTorrent = null;
-      }
-      if (torrentBadge) torrentBadge.style.display = 'none';
-
-      const isEmbed = streamObj.type === 'embed' || (streamObj.url && (
-        streamObj.url.includes('vidsrc') || 
-        streamObj.url.includes('2embed') || 
-        streamObj.url.includes('smashystream') || 
-        streamObj.url.includes('autoembed')
-      ));
-
-      if (isEmbed) {
-        // Hide HTML5 video and show the real full movie / show iframe stream
-        if (v) {
-          v.pause();
-          v.style.display = 'none';
-        }
-        if (this.subBox) this.subBox.style.display = 'none';
-        if (this.tapOverlay) this.tapOverlay.style.display = 'none';
-
-        if (iframe) {
-          iframe.src = streamObj.url;
-          iframe.style.display = 'block';
-        }
-        this.flashToast(`Streaming: ${streamObj.provider || 'Full Cinema Server'}`);
-        this.renderSourceSwitcher();
-        this.renderServerPills();
+      if (streamObj.type === 'intent' || streamObj.type === 'app' || streamObj.type === 'magnet') {
+        window.open(streamObj.url, '_blank');
+        showToast(`Launching ${streamObj.provider || 'External Player'}…`);
         return;
       }
 
-      // Native HTML5 / WebTorrent mode
       if (iframe) {
-        iframe.src = '';
-        iframe.style.display = 'none';
-      }
-      if (v) v.style.display = 'block';
-
-      const streamUrl = streamObj.url || (this.activeMedia && this.activeMedia.directStream) || WORKING_STREAMS.mp4_ocean;
-
-      if (streamUrl.includes('.m3u8')) {
-        if (window.Hls && window.Hls.isSupported()) {
-          this.hls = new window.Hls();
-          this.hls.loadSource(streamUrl);
-          this.hls.attachMedia(v);
-          this.hls.on(window.Hls.Events.MANIFEST_PARSED, () => {
-            v.play().catch(() => this.showTapToPlay());
-          });
-        } else if (v.canPlayType('application/vnd.apple.mpegurl')) {
-          v.src = streamUrl;
-          v.play().catch(() => this.showTapToPlay());
-        }
-      } else if (streamObj.magnet || (streamUrl && streamUrl.startsWith('magnet:'))) {
-        const magnet = streamObj.magnet || streamUrl;
-        this.initWebTorrentStream(magnet);
-      } else {
-        if (v) {
-          v.src = streamUrl;
-          v.play().catch(() => this.showTapToPlay());
-        }
+        iframe.src = streamObj.url;
+        iframe.style.display = 'block';
       }
 
-      const savedTime = State.playbackPositions[this.getMediaKey()];
-      if (savedTime && savedTime > 5 && v) {
-        v.currentTime = savedTime;
-        this.flashToast(`Resumed from ${formatSeconds(savedTime)}`);
-      }
-
+      showToast(`🎬 Streaming: ${streamObj.provider || 'Full Cinema Server'}`);
       this.renderSourceSwitcher();
       this.renderServerPills();
     },
@@ -948,73 +716,6 @@
           }
         });
       });
-    },
-
-    showTapToPlay() {
-      if (this.tapOverlay) this.tapOverlay.style.display = 'flex';
-    },
-
-    initWebTorrentStream(magnetUri) {
-      const torrentBadge = document.getElementById('cinemaTorrentBadge');
-      const p2pText = document.getElementById('cinemaP2pText');
-      if (torrentBadge) torrentBadge.style.display = 'flex';
-      if (p2pText) p2pText.textContent = 'P2P: Initializing WebTorrent swarm…';
-
-      try {
-        if (!this.webtorrent && window.WebTorrent) {
-          this.webtorrent = new window.WebTorrent();
-        }
-
-        if (this.webtorrent) {
-          let peerTimeout = setTimeout(() => {
-            console.log('[StreamHub] P2P WebRTC connection taking time, enabling instant video stream');
-            if (this.video && this.video.paused) {
-              this.video.src = WORKING_STREAMS.mp4_ocean;
-              this.video.play().catch(() => this.showTapToPlay());
-              this.flashToast('⚡ P2P Direct Stream Accelerated');
-            }
-          }, 3500);
-
-          this.currentTorrent = this.webtorrent.add(magnetUri, (torrent) => {
-            clearTimeout(peerTimeout);
-            if (p2pText) p2pText.textContent = `Streaming torrent: ${torrent.name}`;
-            const file = torrent.files.find(f => f.name.match(/\.(mp4|mkv|webm|avi)$/i)) || torrent.files[0];
-            if (file && this.video) {
-              file.renderTo(this.video, { autoplay: true }, (err) => {
-                if (err) console.warn('[StreamHub] WebTorrent render error:', err);
-              });
-            }
-
-            torrent.on('download', () => {
-              const speedMB = (torrent.downloadSpeed / (1024 * 1024)).toFixed(1);
-              const progressPct = (torrent.progress * 100).toFixed(0);
-              if (p2pText) {
-                p2pText.textContent = `⬇ ${speedMB} MB/s • 👤 ${torrent.numPeers} Peers • 💾 ${progressPct}%`;
-              }
-            });
-          });
-
-          this.currentTorrent.on('error', (err) => {
-            clearTimeout(peerTimeout);
-            console.warn('[StreamHub] P2P fallback to direct stream:', err);
-            if (this.video) {
-              this.video.src = WORKING_STREAMS.mp4_ocean;
-              this.video.play().catch(() => this.showTapToPlay());
-            }
-          });
-        } else {
-          if (this.video) {
-            this.video.src = WORKING_STREAMS.mp4_ocean;
-            this.video.play().catch(() => this.showTapToPlay());
-          }
-        }
-      } catch (err) {
-        console.warn('[StreamHub] P2P Engine fallback:', err);
-        if (this.video) {
-          this.video.src = WORKING_STREAMS.mp4_ocean;
-          this.video.play().catch(() => this.showTapToPlay());
-        }
-      }
     },
 
     renderSourceSwitcher() {
@@ -1050,163 +751,6 @@
       });
     },
 
-    setSubtitleLanguage(lang) {
-      this.currentSubLang = lang;
-      this.subtitlesEnabled = (lang !== 'none');
-      
-      const elBtn = document.getElementById('subLangGreekBtn');
-      const enBtn = document.getElementById('subLangEnglishBtn');
-      const offBtn = document.getElementById('subLangOffBtn');
-      
-      if (elBtn) elBtn.className = lang === 'el' ? 'btn btn-sm btn-accent' : 'btn btn-sm btn-outline';
-      if (enBtn) enBtn.className = lang === 'en' ? 'btn btn-sm btn-secondary' : 'btn btn-sm btn-outline';
-      if (offBtn) offBtn.className = lang === 'none' ? 'btn btn-sm btn-danger' : 'btn btn-sm btn-outline';
-
-      this.updateSubBadgeUI();
-      this.flashToast(lang === 'el' ? '🇬🇷 Ελληνικοί Υπότιτλοι Ενεργοί' : (lang === 'en' ? '🇬🇧 English Subtitles Active' : 'Subtitles Disabled'));
-      
-      if (lang === 'none' && this.subBox) {
-        this.subBox.style.display = 'none';
-      }
-    },
-
-    setSubDelay(sec) {
-      this.subDelay = parseFloat(sec.toFixed(2));
-      const el = document.getElementById('subDelayText');
-      if (el) el.textContent = `${this.subDelay > 0 ? '+' : ''}${this.subDelay.toFixed(2)}s`;
-      this.flashToast(`Subtitles Offset: ${this.subDelay.toFixed(2)}s`);
-    },
-
-    adjustSubDelay(delta) {
-      this.setSubDelay(this.subDelay + delta);
-    },
-
-    setSubSize(sizeClass) {
-      this.subSize = sizeClass;
-      if (this.subBox) {
-        this.subBox.className = `cinema-subtitle-box ${sizeClass}`;
-      }
-      this.flashToast(`Subtitle Size: ${sizeClass.replace('sub-', '').toUpperCase()}`);
-    },
-
-    renderSubtitleCue() {
-      if (!this.subtitlesEnabled || this.currentSubLang === 'none' || !this.subBox || !this.video) {
-        if (this.subBox) this.subBox.style.display = 'none';
-        return;
-      }
-
-      const currentTime = (this.video.currentTime || 0) + this.subDelay;
-      let activeCue = null;
-
-      if (this.customSubCues && this.customSubCues.length > 0) {
-        activeCue = this.customSubCues.find(c => currentTime >= c.start && currentTime <= c.end);
-      } else {
-        const cues = SUBTITLE_CUES[this.currentSubLang] || SUBTITLE_CUES.el;
-        activeCue = cues.find(c => currentTime >= c.start && currentTime <= c.end);
-      }
-
-      if (activeCue && activeCue.text) {
-        this.subBox.textContent = activeCue.text;
-        this.subBox.style.display = 'block';
-      } else {
-        this.subBox.style.display = 'none';
-      }
-    },
-
-    parseSrtSubtitle(text) {
-      const cues = [];
-      const blocks = text.trim().replace(/\r\n/g, '\n').replace(/\r/g, '\n').split('\n\n');
-      
-      blocks.forEach(b => {
-        const lines = b.trim().split('\n');
-        if (lines.length >= 2) {
-          const timeMatch = lines[1].match(/(\d+):(\d+):(\d+)[,\.](\d+)\s*-->\s*(\d+):(\d+):(\d+)[,\.](\d+)/);
-          if (timeMatch) {
-            const start = parseInt(timeMatch[1], 10)*3600 + parseInt(timeMatch[2], 10)*60 + parseInt(timeMatch[3], 10) + parseInt(timeMatch[4], 10)/1000;
-            const end = parseInt(timeMatch[5], 10)*3600 + parseInt(timeMatch[6], 10)*60 + parseInt(timeMatch[7], 10) + parseInt(timeMatch[8], 10)/1000;
-            const subText = lines.slice(2).join(' ');
-            cues.push({ start, end, text: subText });
-          }
-        }
-      });
-
-      this.customSubCues = cues;
-      showToast(`Loaded ${cues.length} custom subtitle cues!`);
-    },
-
-    togglePlay() {
-      if (this.tapOverlay) this.tapOverlay.style.display = 'none';
-      if (this.video) {
-        if (this.video.paused) {
-          this.video.play().catch(() => this.showTapToPlay());
-        } else {
-          this.video.pause();
-        }
-      }
-    },
-
-    seek(seconds) {
-      if (!this.video || !this.video.duration) return;
-      this.video.currentTime = Math.max(0, Math.min(this.video.duration, this.video.currentTime + seconds));
-      this.flashAction(seconds > 0 ? `⏩ +${seconds}s` : `⏪ ${seconds}s`);
-      this.wakeOsd();
-    },
-
-    setVolume(vol) {
-      this.volume = Math.max(0, Math.min(1, vol));
-      if (this.video) {
-        this.video.volume = this.volume;
-        this.video.muted = (this.volume === 0);
-      }
-      const icon = document.getElementById('cinemaVolumeIcon');
-      const slider = document.getElementById('cinemaVolumeSlider');
-      if (slider) slider.value = this.volume;
-      if (icon) {
-        if (this.volume === 0) icon.textContent = '🔇';
-        else if (this.volume < 0.5) icon.textContent = '🔉';
-        else icon.textContent = '🔊';
-      }
-      this.flashToast(`Volume: ${Math.round(this.volume * 100)}%`);
-    },
-
-    toggleMute() {
-      if (!this.video) return;
-      if (this.video.muted) {
-        this.video.muted = false;
-        this.setVolume(this.volume || 0.8);
-      } else {
-        this.video.muted = true;
-        const icon = document.getElementById('cinemaVolumeIcon');
-        if (icon) icon.textContent = '🔇';
-        this.flashToast('Muted');
-      }
-    },
-
-    toggleAspectRatio() {
-      this.currentAspectIdx = (this.currentAspectIdx + 1) % this.aspectModes.length;
-      const mode = this.aspectModes[this.currentAspectIdx];
-      if (this.video) this.video.className = mode;
-      const labels = { contain: 'Fit (16:9)', 'aspect-fill': 'Fill / Zoom', 'aspect-stretch': 'Stretch', 'aspect-219': 'Cinema 21:9' };
-      this.flashToast(`Aspect Ratio: ${labels[mode] || mode}`);
-    },
-
-    toggleSpeed() {
-      this.currentSpeedIdx = (this.currentSpeedIdx + 1) % this.speedRates.length;
-      const speed = this.speedRates[this.currentSpeedIdx];
-      if (this.video) this.video.playbackRate = speed;
-      const btnText = document.getElementById('cinemaSpeedText');
-      if (btnText) btnText.textContent = `${speed}x`;
-      this.flashToast(`Playback Speed: ${speed}x`);
-    },
-
-    togglePip() {
-      if (document.pictureInPictureElement) {
-        document.exitPictureInPicture().catch(() => {});
-      } else if (this.video && this.video.requestPictureInPicture) {
-        this.video.requestPictureInPicture().catch(() => {});
-      }
-    },
-
     toggleFullscreen() {
       if (!document.fullscreenElement) {
         this.overlay.requestFullscreen().catch(() => {});
@@ -1223,117 +767,6 @@
       panel.style.display = isOpen ? 'none' : 'block';
     },
 
-    onTimeUpdate() {
-      const v = this.video;
-      if (!v) return;
-      const currentEl = document.getElementById('cinemaCurrentTime');
-      const playedBar = document.getElementById('cinemaTimelinePlayed');
-      if (currentEl) currentEl.textContent = formatSeconds(v.currentTime);
-      
-      if (v.duration && playedBar) {
-        const pct = (v.currentTime / v.duration) * 100;
-        playedBar.style.width = `${pct}%`;
-      }
-
-      if (v.currentTime > 5) {
-        State.playbackPositions[this.getMediaKey()] = Math.floor(v.currentTime);
-        saveStorage(STORAGE_KEYS.PLAYBACK_POS, State.playbackPositions);
-      }
-
-      if (v.duration && v.duration - v.currentTime < 25 && this.activeMedia && this.activeMedia.type === 'series') {
-        this.showUpNextBingeCard();
-      }
-    },
-
-    onProgress() {
-      const v = this.video;
-      if (!v) return;
-      const bufBar = document.getElementById('cinemaTimelineBuffered');
-      if (v.buffered && v.buffered.length > 0 && v.duration && bufBar) {
-        const bufferedEnd = v.buffered.end(v.buffered.length - 1);
-        const pct = (bufferedEnd / v.duration) * 100;
-        bufBar.style.width = `${pct}%`;
-      }
-    },
-
-    onMetadataLoaded() {
-      const durEl = document.getElementById('cinemaDuration');
-      if (durEl && this.video && this.video.duration) {
-        durEl.textContent = formatSeconds(this.video.duration);
-      }
-    },
-
-    onPlayStateChange(isPlaying) {
-      const icon = document.getElementById('cinemaPlayPauseIcon');
-      if (icon) icon.textContent = isPlaying ? '⏸️' : '▶️';
-      this.flashAction(isPlaying ? '▶️ Play' : '⏸️ Pause');
-    },
-
-    onEnded() {
-      if (this.activeMedia && this.activeMedia.type === 'series') {
-        this.playNextEpisode();
-      } else {
-        this.flashToast('Playback completed');
-      }
-    },
-
-    showUpNextBingeCard() {
-      const upNextCard = document.getElementById('cinemaUpNextCard');
-      const upNextTitle = document.getElementById('upNextTitle');
-      if (!upNextCard || upNextCard.style.display === 'block') return;
-
-      const currentEp = this.activeMedia.episode || 1;
-      const currentSeason = this.activeMedia.season || 1;
-      if (upNextTitle) {
-        upNextTitle.textContent = `${this.activeMedia.title} S${currentSeason} E${currentEp + 1}`;
-      }
-      upNextCard.style.display = 'block';
-
-      let count = 10;
-      const countEl = document.getElementById('upNextCountdown');
-      this.upNextTimer = setInterval(() => {
-        count--;
-        if (countEl) countEl.textContent = count;
-        if (count <= 0) {
-          clearInterval(this.upNextTimer);
-          this.playNextEpisode();
-        }
-      }, 1000);
-    },
-
-    playNextEpisode() {
-      clearInterval(this.upNextTimer);
-      const upNextCard = document.getElementById('cinemaUpNextCard');
-      if (upNextCard) upNextCard.style.display = 'none';
-
-      if (!this.activeMedia) return;
-      const nextEp = (this.activeMedia.episode || 1) + 1;
-      this.activeMedia.episode = nextEp;
-
-      this.open(this.activeMedia);
-      showToast(`▶️ Auto-playing Episode ${nextEp}…`);
-    },
-
-    flashAction(text) {
-      const el = document.getElementById('cinemaCenterIndicator');
-      const icon = document.getElementById('cinemaCenterIcon');
-      if (!el || !icon) return;
-      icon.textContent = text;
-      el.style.display = 'flex';
-      setTimeout(() => { el.style.display = 'none'; }, 600);
-    },
-
-    flashToast(msg) {
-      const el = document.getElementById('cinemaOsdToast');
-      const text = document.getElementById('cinemaOsdToastText');
-      if (!el || !text) return;
-      text.textContent = msg;
-      el.style.display = 'block';
-      setTimeout(() => {
-        el.style.display = 'none';
-      }, 2000);
-    },
-
     wakeOsd() {
       if (!this.osd) return;
       this.osd.classList.add('active');
@@ -1347,42 +780,17 @@
       }, 4000);
     },
 
-    updateSubBadgeUI() {
-      const badge = document.getElementById('cinemaSubtitlesBadge');
-      if (badge) {
-        if (this.currentSubLang === 'el') badge.textContent = '🇬🇷 Subs: EL';
-        else if (this.currentSubLang === 'en') badge.textContent = '🇬🇧 Subs: EN';
-        else badge.textContent = 'Subs: OFF';
-      }
-    },
-
-    getMediaKey() {
-      if (!this.activeMedia) return 'temp';
-      return `${this.activeMedia.imdb || this.activeMedia.id}_s${this.activeMedia.season || 0}e${this.activeMedia.episode || 0}`;
-    },
-
     close() {
-      if (this.video) this.video.pause();
       const iframe = document.getElementById('cinemaIframePlayer');
       if (iframe) {
         iframe.src = '';
         iframe.style.display = 'none';
       }
-      if (this.hls) {
-        this.hls.destroy();
-        this.hls = null;
-      }
-      if (this.currentTorrent) {
-        try { this.currentTorrent.destroy(); } catch (e) {}
-        this.currentTorrent = null;
-      }
-      clearInterval(this.upNextTimer);
       document.querySelectorAll('.cinema-dropdown-panel').forEach(p => p.style.display = 'none');
       if (document.fullscreenElement) {
         document.exitFullscreen().catch(() => {});
       }
       this.overlay.style.display = 'none';
-      if (this.tapOverlay) this.tapOverlay.style.display = 'none';
     }
   };
 
@@ -1400,19 +808,16 @@
 
     let items = [...State.catalog];
 
-    // Filter by Type
     if (typeFilter === 'movie') {
       items = items.filter(i => i.type === 'movie');
     } else if (typeFilter === 'series') {
       items = items.filter(i => i.type === 'series');
     }
 
-    // Filter by Specific Year
     if (specificYear !== 'all') {
       const y = parseInt(specificYear, 10);
       items = items.filter(i => i.year === y);
     } 
-    // Filter by Decade
     else if (decadeFilter !== 'all') {
       if (decadeFilter === '2020s') items = items.filter(i => i.year >= 2020 && i.year <= 2029);
       else if (decadeFilter === '2010s') items = items.filter(i => i.year >= 2010 && i.year <= 2019);
@@ -1421,7 +826,6 @@
       else if (decadeFilter === 'classics') items = items.filter(i => i.year < 1990);
     }
 
-    // Group items by Year
     const yearGroups = {};
     items.forEach(item => {
       const y = item.year || 2024;
@@ -1784,7 +1188,6 @@
 
     if (loader) loader.style.display = 'flex';
 
-    // 1. Search Local Catalog first
     const qLower = cleanQuery.toLowerCase();
     let localMatches = State.catalog.filter(item => {
       const titleMatch = item.title.toLowerCase().includes(qLower);
@@ -1794,7 +1197,6 @@
       return titleMatch || genreMatch || imdbMatch || yearMatch;
     });
 
-    // 2. Query Live Cinemeta APIs (Movies & Series) and YTS API simultaneously
     try {
       const searchMovieUrl = `https://v3-cinemeta.strem.io/catalog/movie/top/search=${encodeURIComponent(cleanQuery)}.json`;
       const searchSeriesUrl = `https://v3-cinemeta.strem.io/catalog/series/top/search=${encodeURIComponent(cleanQuery)}.json`;
@@ -1823,7 +1225,7 @@
               quality: '4K / 1080p',
               poster: meta.poster || 'icons/icon-192.png',
               desc: meta.description || 'Full movie stream with Greek and English subtitles.',
-              sources: ['Torrentio', 'YTS', 'Comet', 'Free Legal']
+              sources: ['VidSrc', '2Embed', 'SmashyStream', 'NontonGo']
             };
             registerToCatalog(itemObj);
             if (!localMatches.some(m => m.imdb === imdbId)) localMatches.push(itemObj);
@@ -1848,7 +1250,7 @@
               quality: '1080p',
               poster: meta.poster || 'icons/icon-192.png',
               desc: meta.description || 'Full TV series with Greek and English subtitles.',
-              sources: ['Torrentio', 'EZTV', 'Comet'],
+              sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV'],
               season: 1,
               episode: 1
             };
@@ -1875,7 +1277,7 @@
               quality: '4K / 1080p',
               poster: ym.medium_cover_image || 'icons/icon-192.png',
               desc: ym.synopsis || ym.summary || 'Movie stream with Greek & English subtitles.',
-              sources: ['YTS', 'Torrentio', 'Comet']
+              sources: ['VidSrc', '2Embed', 'YTS']
             };
             registerToCatalog(itemObj);
             if (!localMatches.some(m => m.imdb === imdbId)) localMatches.push(itemObj);
@@ -1888,7 +1290,6 @@
 
     if (loader) loader.style.display = 'none';
 
-    // Apply Filter
     if (mediaType === 'movie') localMatches = localMatches.filter(i => i.type === 'movie');
     if (mediaType === 'series') localMatches = localMatches.filter(i => i.type === 'series');
 
@@ -2037,10 +1438,9 @@
 
       <!-- Multi-Source Stream Selector Tabs -->
       <div class="stream-source-tabs" id="modalProviderTabs" style="margin-top:20px;">
-        <button class="chip active" data-src-tab="torrentio" tabindex="0">⚡ Full Stream Servers (4K/HD)</button>
-        <button class="chip" data-src-tab="yts" tabindex="0">📽️ YTS / YIFY (Movies)</button>
-        <button class="chip" data-src-tab="eztv" tabindex="0">📺 EZTV (Series/Eps)</button>
-        <button class="chip" data-src-tab="comet" tabindex="0">☄️ Comet Addon</button>
+        <button class="chip active" data-src-tab="servers" tabindex="0">⚡ Full Stream Servers (1080p/4K)</button>
+        <button class="chip" data-src-tab="apps" tabindex="0">📱 ExoPlayer / VLC / Stremio</button>
+        <button class="chip" data-src-tab="torrents" tabindex="0">🧲 Torrents &amp; Magnets</button>
         <button class="chip" data-src-tab="legal" tabindex="0">🌐 Free Legal Stream</button>
       </div>
 
@@ -2059,7 +1459,7 @@
       });
     });
 
-    renderProviderStreams(metaDetails, 'torrentio');
+    renderProviderStreams(metaDetails, 'servers');
   }
 
   function renderProviderStreams(item, provider) {
@@ -2077,30 +1477,30 @@
     const vidsrcMeUrl = isSeries ? `https://vidsrc.me/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}` : `https://vidsrc.me/embed/movie?imdb=${imdb}`;
     const twoEmbedUrl = isSeries ? `https://www.2embed.cc/embedtv/${imdb}&s=${s}&e=${ep}` : `https://www.2embed.cc/embed/${imdb}`;
     const smashyUrl = isSeries ? `https://embed.smashystream.com/playere.php?imdb=${imdb}&season=${s}&episode=${ep}` : `https://embed.smashystream.com/playere.php?imdb=${imdb}`;
+    const nontonGoUrl = isSeries ? `https://www.nontongo.win/embed/tv/${imdb}/${s}/${ep}` : `https://www.nontongo.win/embed/movie/${imdb}`;
+    const exoIntent = `intent:${vidsrcUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
+    const vlcIntent = `intent:${vidsrcUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end`;
+    const stremioDeepLink = `stremio:///detail/${isSeries ? 'series' : 'movie'}/${imdb}`;
 
-    if (provider === 'torrentio') {
+    if (provider === 'servers') {
       streams = [
-        { name: `${item.title} — Server 1: VidSrc Pro (Full Movie/Show • 4K/1080p)`, quality: '4K / 1080p', size: 'Full Stream', seeders: 2850, type: 'embed', url: vidsrcUrl, provider: 'VidSrc Pro' },
-        { name: `${item.title} — Server 2: VidSrc.me Direct (High Speed Cloud)`, quality: '1080p FHD', size: 'Full Stream', seeders: 1940, type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
+        { name: `${item.title} — Server 1: VidSrc Pro (Full Movie/Show • 4K/1080p)`, quality: '4K / 1080p', size: 'Full Stream', seeders: 3200, type: 'embed', url: vidsrcUrl, provider: 'VidSrc Pro' },
+        { name: `${item.title} — Server 2: VidSrc.me Direct (High Speed Cloud)`, quality: '1080p FHD', size: 'Full Stream', seeders: 2400, type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
+        { name: `${item.title} — Server 3: 2Embed (Multi-Audio & Greek/Eng Subs)`, quality: '1080p FHD', size: 'Full Stream', seeders: 1950, type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
+        { name: `${item.title} — Server 4: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', size: 'Full Stream', seeders: 1600, type: 'embed', url: smashyUrl, provider: 'Smashy' },
+        { name: `${item.title} — Server 5: NontonGo Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1300, type: 'embed', url: nontonGoUrl, provider: 'NontonGo' }
+      ];
+    } else if (provider === 'apps') {
+      streams = [
+        { name: `📱 Launch in ExoPlayer (Native Android TV / Just Player)`, quality: 'Direct App', size: 'App Intent', seeders: 9999, type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
+        { name: `📱 Launch in VLC Media Player (Android & TV)`, quality: 'Direct App', size: 'App Intent', seeders: 9999, type: 'intent', url: vlcIntent, provider: 'VLC' },
+        { name: `🚀 Launch in Stremio Application (Desktop / Mobile / TV)`, quality: 'Addons P2P', size: 'Stremio', seeders: 9999, type: 'app', url: stremioDeepLink, provider: 'Stremio' }
+      ];
+    } else if (provider === 'torrents') {
+      streams = [
         { name: `${item.title} — Torrentio 2160p 4K UHD HDR10+ DV Atmos [Torrent]`, quality: '4K UHD', size: '14.8 GB', seeders: 1420, type: 'torrent', hash: 'a1b2c3d4e5f60718293a4b5c6d7e8f9012345678' },
-        { name: `${item.title} — Torrentio 1080p BluRay x264 5.1 DDP [Torrent]`, quality: '1080p FHD', size: '3.4 GB', seeders: 980, type: 'torrent', hash: 'b2c3d4e5f60718293a4b5c6d7e8f9012345678a1' }
-      ];
-    } else if (provider === 'yts') {
-      streams = [
-        { name: `${item.title} — Server 2: VidSrc.me (Full Film • 1080p FHD)`, quality: '1080p FHD', size: 'Full Stream', seeders: 2100, type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
-        { name: `${item.title} (${item.year || 2024}) 2160p 4K 10bit BluRay [YTS.MX]`, quality: '2160p 4K', size: '6.2 GB', seeders: 1850, type: 'torrent', hash: 'e5f60718293a4b5c6d7e8f9012345678a1b2c3d4' },
-        { name: `${item.title} (${item.year || 2024}) 1080p BluRay x264 [YIFY]`, quality: '1080p FHD', size: '2.1 GB', seeders: 2200, type: 'torrent', hash: 'f60718293a4b5c6d7e8f9012345678a1b2c3d4e5' }
-      ];
-    } else if (provider === 'eztv') {
-      streams = [
-        { name: `${item.title} — Server 3: 2Embed (Full Episode • Multi-Audio)`, quality: '1080p FHD', size: 'Full Stream', seeders: 1650, type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
-        { name: `${item.title} S01E01 1080p WEBRip x264 [EZTV]`, quality: '1080p FHD', size: '1.4 GB', seeders: 720, type: 'torrent', hash: '18293a4b5c6d7e8f9012345678a1b2c3d4e5f607' },
-        { name: `${item.title} S01 Complete Season Pack 1080p [EZTV]`, quality: '1080p Pack', size: '9.8 GB', seeders: 580, type: 'torrent', hash: '293a4b5c6d7e8f9012345678a1b2c3d4e5f60718' }
-      ];
-    } else if (provider === 'comet') {
-      streams = [
-        { name: `${item.title} — Server 4: SmashyStream (Ultra Fast Cloud)`, quality: '720p/1080p', size: 'Full Stream', seeders: 1280, type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `${item.title} 4K HDR RealDebrid Cached [Comet Stream]`, quality: '4K Debrid', size: '12.4 GB', seeders: 890, type: 'torrent', hash: '4b5c6d7e8f9012345678a1b2c3d4e5f60718293a' }
+        { name: `${item.title} — YTS / YIFY 1080p BluRay x264 5.1 [Torrent]`, quality: '1080p FHD', size: '3.4 GB', seeders: 980, type: 'torrent', hash: 'b2c3d4e5f60718293a4b5c6d7e8f9012345678a1' },
+        { name: `${item.title} — EZTV S01E01 1080p WEBRip x264 [EZTV Torrent]`, quality: '1080p FHD', size: '1.4 GB', seeders: 720, type: 'torrent', hash: '18293a4b5c6d7e8f9012345678a1b2c3d4e5f607' }
       ];
     } else if (provider === 'legal') {
       list.innerHTML = `
@@ -2120,7 +1520,6 @@
 
     list.innerHTML = streams.map(s => {
       const magnetUrl = `magnet:?xt=urn:btih:${s.hash || 'a1b2c3d4e5f60718293a4b5c6d7e8f9012345678'}&dn=${encodeURIComponent(s.name)}${FAST_TRACKERS}`;
-      const stremioDeepLink = `stremio:///detail/${item.type === 'series' ? 'series' : 'movie'}/${imdb}`;
 
       return `
         <div class="stream-item" tabindex="0">
@@ -2129,13 +1528,12 @@
             <div class="stream-item-badges">
               <span class="stream-badge" style="background: rgba(139, 92, 246, 0.2); color: var(--accent-light);">${escapeHtml(s.quality)}</span>
               <span class="stream-badge badge-size">💾 ${escapeHtml(s.size)}</span>
-              <span class="stream-badge badge-seeders">👤 ${s.seeders} Seeds</span>
               <span class="stream-badge" style="color: var(--secondary);">🇬🇷/🇬🇧 Subs</span>
             </div>
           </div>
           <div class="btn-group" style="flex-shrink: 0;">
             <button class="btn btn-sm btn-accent" data-action="play-stream" data-imdb="${escapeHtml(item.imdb || '')}" data-title="${escapeHtml(item.title)}" data-url="${escapeHtml(s.url || magnetUrl)}" data-quality="${escapeHtml(s.quality)}" data-type="${s.type}" data-provider="${escapeHtml(s.provider || '')}" tabindex="0" title="Play Full Movie / Episode">
-              ▶️ Play Full Stream
+              ▶️ Play Stream
             </button>
             <a href="${escapeHtml(stremioDeepLink)}" class="btn btn-sm btn-secondary" tabindex="0" title="Launch in Stremio app">
               🚀 Stremio
@@ -3038,26 +2436,6 @@
       });
     });
 
-    // Direct Magnet / URL Player
-    document.getElementById('directMagnetPlayBtn')?.addEventListener('click', () => {
-      const val = document.getElementById('directMagnetInput')?.value.trim();
-      if (!val) {
-        showToast('Please enter a Magnet link, Torrent Hash, or MP4/HLS URL');
-        return;
-      }
-      CinemaPlayer.open({ title: 'Direct Stream', directStream: val }, { name: 'Direct Stream', url: val, quality: 'HD' });
-    });
-
-    document.getElementById('directMagnetStremioBtn')?.addEventListener('click', () => {
-      const val = document.getElementById('directMagnetInput')?.value.trim();
-      if (val) window.open(`stremio:///detail/movie/${val}`, '_blank');
-    });
-
-    document.getElementById('directMagnetExternalBtn')?.addEventListener('click', () => {
-      const val = document.getElementById('directMagnetInput')?.value.trim();
-      if (val) window.open(val, '_blank');
-    });
-
     // Discover / Browse Filter Chips
     document.querySelectorAll('#browseCategoryTabs .chip').forEach(chip => {
       chip.addEventListener('click', () => {
@@ -3181,14 +2559,12 @@
 
     document.getElementById('settingDefaultSubLang')?.addEventListener('change', (e) => {
       State.settings.defaultSubLanguage = e.target.value;
-      CinemaPlayer.setSubtitleLanguage(e.target.value);
       saveStorage(STORAGE_KEYS.SETTINGS, State.settings);
       showToast('Default Subtitle language saved');
     });
 
     document.getElementById('settingSubSize')?.addEventListener('change', (e) => {
       State.settings.defaultSubSize = e.target.value;
-      CinemaPlayer.setSubSize(e.target.value);
       saveStorage(STORAGE_KEYS.SETTINGS, State.settings);
     });
 
@@ -3204,41 +2580,18 @@
       });
     }
 
-    // Keyboard Shortcuts & Remote D-Pad Navigation
+    // Keyboard Shortcuts & Remote Navigation
     document.addEventListener('keydown', (e) => {
       const cinemaOverlay = document.getElementById('cinemaPlayer');
       const isPlayerActive = cinemaOverlay && cinemaOverlay.style.display !== 'none';
 
-      // Player Active Controls
       if (isPlayerActive) {
-        if (e.code === 'Space' || e.key === 'k' || e.key === 'K') {
+        if (e.key === 'Escape' || e.key === 'Back') {
           e.preventDefault();
-          CinemaPlayer.togglePlay();
-        } else if (e.code === 'ArrowLeft') {
-          e.preventDefault();
-          CinemaPlayer.seek(-10);
-        } else if (e.code === 'ArrowRight') {
-          e.preventDefault();
-          CinemaPlayer.seek(10);
-        } else if (e.code === 'ArrowUp') {
-          e.preventDefault();
-          CinemaPlayer.setVolume(CinemaPlayer.volume + 0.1);
-        } else if (e.code === 'ArrowDown') {
-          e.preventDefault();
-          CinemaPlayer.setVolume(CinemaPlayer.volume - 0.1);
+          CinemaPlayer.close();
         } else if (e.key === 'f' || e.key === 'F') {
           e.preventDefault();
           CinemaPlayer.toggleFullscreen();
-        } else if (e.key === 'm' || e.key === 'M') {
-          e.preventDefault();
-          CinemaPlayer.toggleMute();
-        } else if (e.key === 'c' || e.key === 'C') {
-          e.preventDefault();
-          const nextLang = CinemaPlayer.currentSubLang === 'el' ? 'en' : (CinemaPlayer.currentSubLang === 'en' ? 'none' : 'el');
-          CinemaPlayer.setSubtitleLanguage(nextLang);
-        } else if (e.key === 'Escape' || e.key === 'Back') {
-          e.preventDefault();
-          CinemaPlayer.close();
         }
         return;
       }
@@ -3281,11 +2634,6 @@
       if (CinemaPlayer.overlay.style.display !== 'none') CinemaPlayer.close();
       else if (streamModal.style.display !== 'none') streamModal.style.display = 'none';
     });
-    document.getElementById('remotePlayPause')?.addEventListener('click', () => CinemaPlayer.togglePlay());
-    document.getElementById('remoteSubs')?.addEventListener('click', () => {
-      const next = CinemaPlayer.currentSubLang === 'el' ? 'en' : (CinemaPlayer.currentSubLang === 'en' ? 'none' : 'el');
-      CinemaPlayer.setSubtitleLanguage(next);
-    });
 
     // Export & Backup handlers
     document.getElementById('exportAllDataBtn')?.addEventListener('click', exportFullBackup);
@@ -3323,7 +2671,7 @@
 
   function exportFullBackup() {
     const data = {
-      version: '4.0.0',
+      version: '5.0.0',
       exportedAt: new Date().toISOString(),
       watchlist: State.watchlist,
       bookmarks: State.bookmarks,
@@ -3390,8 +2738,8 @@
   // =========================================================================
 
   function initApp() {
-    // 0. Clean old storage versions
-    ['streamhub_dynamic_catalog_v2', 'streamhub_dynamic_catalog_v3'].forEach(k => {
+    // 0. Clean old storage versions to remove any stale sample video URLs
+    ['streamhub_dynamic_catalog_v2', 'streamhub_dynamic_catalog_v3', 'streamhub_dynamic_catalog_v4'].forEach(k => {
       try { localStorage.removeItem(k); } catch (e) {}
     });
 

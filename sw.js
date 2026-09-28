@@ -1,5 +1,5 @@
 // StreamHub Pro Service Worker with Embedded Player Support
-const CACHE_NAME = 'streamhub-pro-v4.0.0';
+const CACHE_NAME = 'streamhub-pro-v5.0.0';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
