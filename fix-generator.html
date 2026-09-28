@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StreamHub Streaming Server Fix Generator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .container {
+      background: white;
+      border-radius: 20px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 800px;
+      width: 100%;
+      padding: 40px;
+    }
+    h1 {
+      color: #667eea;
+      margin-bottom: 10px;
+      font-size: 28px;
+    }
+    .subtitle {
+      color: #666;
+      margin-bottom: 30px;
+      font-size: 14px;
+    }
+    .status {
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      font-weight: 500;
+    }
+    .status.loading {
+      background: #fff3cd;
+      color: #856404;
+    }
+    .status.success {
+      background: #d4edda;
+      color: #155724;
+    }
+    .status.error {
+      background: #f8d7da;
+      color: #721c24;
+    }
+    .btn {
+      background: #667eea;
+      color: white;
+      border: none;
+      padding: 12px 30px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s;
+      display: inline-block;
+      text-decoration: none;
+    }
+    .btn:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+    .btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+    .fixes-list {
+      background: #f8f9fa;
+      border-radius: 10px;
+      padding: 20px;
+      margin: 20px 0;
+    }
+    .fix-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+    .fix-item:last-child {
+      border-bottom: none;
+    }
+    .fix-item span {
+      display: inline-block;
+      margin-right: 10px;
+    }
+    textarea {
+      width: 100%;
+      min-height: 200px;
+      padding: 15px;
+      border: 2px solid #e0e0e0;
+      border-radius: 10px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      margin: 20px 0;
+      resize: vertical;
+    }
+    .progress {
+      width: 100%;
+      height: 6px;
+      background: #e0e0e0;
+      border-radius: 3px;
+      overflow: hidden;
+      margin: 15px 0;
+    }
+    .progress-bar {
+      height: 100%;
+      background: #667eea;
+      width: 0%;
+      transition: width 0.3s;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🔧 StreamHub Streaming Server Fix</h1>
+    <p class="subtitle">Automatically fix dead streaming servers (September 2026)</p>
+    
+    <div id="status" class="status loading" style="display:none;">
+      ⏳ Processing...
+    </div>
+    
+    <div class="progress" id="progress" style="display:none;">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+    
+    <div class="fixes-list">
+      <strong>🎯 Fixes Applied:</strong>
+      <div class="fix-item">
+        <span>✅</span> vidsrc.to → vidsrc.sh
+      </div>
+      <div class="fix-item">
+        <span>✅</span> 2embed.cc → superembed.stream
+      </div>
+      <div class="fix-item">
+        <span>✅</span> smashystream.com → vsembed.ru
+      </div>
+      <div class="fix-item">
+        <span>✅</span> nontongo.win → videasy.xyz
+      </div>
+      <div class="fix-item">
+        <span>✅</span> vidsrc.pm → vidsrc-embed.ru
+      </div>
+      <div class="fix-item">
+        <span>✅</span> Default server setting updated
+      </div>
+    </div>
+    
+    <button id="generateBtn" class="btn" onclick="generateFix()">
+      🚀 Generate Fixed app.js
+    </button>
+    
+    <textarea id="output" placeholder="Fixed app.js code will appear here..." style="display:none;"></textarea>
+    
+    <button id="downloadBtn" class="btn" onclick="downloadFile()" style="display:none;">
+      💾 Download Fixed app.js
+    </button>
+    
+    <button id="copyBtn" class="btn" onclick="copyToClipboard()" style="display:none;">
+      📋 Copy to Clipboard
+    </button>
+  </div>
+
+  <script>
+    const APP_JS_URL = 'https://raw.githubusercontent.com/Mylittlestories/streamhub/main/app.js';
+    let fixedContent = '';
+
+    async function generateFix() {
+      const statusEl = document.getElementById('status');
+      const progressEl = document.getElementById('progress');
+      const progressBar = document.getElementById('progressBar');
+      const outputEl = document.getElementById('output');
+      const generateBtn = document.getElementById('generateBtn');
+      const downloadBtn = document.getElementById('downloadBtn');
+      const copyBtn = document.getElementById('copyBtn');
+      
+      try {
+        // Show loading
+        statusEl.style.display = 'block';
+        statusEl.className = 'status loading';
+        statusEl.textContent = '⏳ Downloading app.js...';
+        progressEl.style.display = 'block';
+        progressBar.style.width = '20%';
+        generateBtn.disabled = true;
+        
+        // Download
+        const response = await fetch(APP_JS_URL);
+        if (!response.ok) throw new Error('Failed to download app.js');
+        
+        let content = await response.text();
+        progressBar.style.width = '40%';
+        statusEl.textContent = '🔧 Applying fixes...';
+        
+        // Apply fixes
+        content = content.replace(/https:\/\/vidsrc\.to\/embed\/tv\//g, 'https://vidsrc.sh/embed/tv/');
+        content = content.replace(/https:\/\/vidsrc\.to\/embed\/movie\//g, 'https://vidsrc.sh/embed/movie/');
+        progressBar.style.width = '55%';
+        
+        content = content.replace(/https:\/\/www\.2embed\.cc\/embedtv\//g, 'https://www.superembed.stream/embed/tv?imdb=');
+        content = content.replace(/https:\/\/www\.2embed\.cc\/embed\//g, 'https://www.superembed.stream/embed/movie?imdb=');
+        progressBar.style.width = '70%';
+        
+        content = content.replace(/https:\/\/embed\.smashystream\.com\/playere\.php\?imdb=/g, 'https://vsembed.ru/embed/movie/');
+        progressBar.style.width = '80%';
+        
+        content = content.replace(/https:\/\/www\.nontongo\.win\/embed\/tv\//g, 'https://videasy.xyz/embed/tv?imdb=');
+        content = content.replace(/https:\/\/www\.nontongo\.win\/embed\/movie\//g, 'https://videasy.xyz/embed/movie?imdb=');
+        progressBar.style.width = '90%';
+        
+        content = content.replace(/https:\/\/vidsrc\.pm\/embed\/tv\?imdb=/g, 'https://vidsrc-embed.ru/embed/tv/');
+        content = content.replace(/https:\/\/vidsrc\.pm\/embed\/movie\?imdb=/g, 'https://vidsrc-embed.ru/embed/movie/');
+        
+        content = content.replace(/defaultServer:\s*['"]vidsrc['"]/g, "defaultServer: 'vidsrc-primary'");
+        progressBar.style.width = '100%';
+        
+        fixedContent = content;
+        
+        // Show success
+        statusEl.className = 'status success';
+        statusEl.textContent = '✅ Fix generated successfully! (' + content.length + ' bytes)';
+        outputEl.style.display = 'block';
+        outputEl.value = content;
+        downloadBtn.style.display = 'inline-block';
+        copyBtn.style.display = 'inline-block';
+        
+      } catch (error) {
+        statusEl.className = 'status error';
+        statusEl.textContent = '❌ Error: ' + error.message;
+        generateBtn.disabled = false;
+      }
+    }
+
+    function downloadFile() {
+      const blob = new Blob([fixedContent], { type: 'text/javascript' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'app.js';
+      a.click();
+      URL.revokeObjectURL(url);
+      
+      alert('✅ Downloaded! Now:\n1. Go to your repository\n2. Replace the old app.js with this file\n3. Commit and push to GitHub');
+    }
+
+    function copyToClipboard() {
+      const outputEl = document.getElementById('output');
+      outputEl.select();
+      document.execCommand('copy');
+      alert('✅ Copied to clipboard!\n\nNow:\n1. Go to GitHub repository\n2. Click app.js\n3. Click edit (pencil icon)\n4. Select all (Ctrl+A) and paste (Ctrl+V)\n5. Commit changes');
+    }
+  </script>
+</body>
+</html>
