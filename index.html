@@ -9,7 +9,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="style.css?v=5.0.0">
+  <link rel="stylesheet" href="style.css?v=6.0.0">
 
   <!-- Local Bundled Hls.js & WebTorrent libraries for Static GitHub Pages -->
   <script src="libs/hls.min.js"></script>
@@ -805,7 +805,7 @@
     <!-- Video Surface -->
     <div class="cinema-video-surface" id="cinemaVideoSurface">
       <!-- 1. Real Full Movie & TV Series Embed Stream Player -->
-      <iframe id="cinemaIframePlayer" class="cinema-stream-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" style="display:none;"></iframe>
+      <iframe id="cinemaIframePlayer" class="cinema-stream-iframe" allowfullscreen="true" webkitallowfullscreen="true" mozallowfullscreen="true" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen" loading="eager" style="display:none;"></iframe>
 
       <!-- 2. Native HTML5 Video Element (For Direct Streams / Debrid / WebTorrent) -->
       <video id="kodiPlayerVideo" playsinline tabindex="0"></video>
@@ -1037,6 +1037,6 @@
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
   <!-- Main Master Application Script -->
-  <script src="app.js?v=5.0.0"></script>
+  <script src="app.js?v=6.0.0"></script>
 </body>
 </html>

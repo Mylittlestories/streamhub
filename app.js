@@ -1,6 +1,6 @@
 /**
  * StreamHub Pro — Universal Cinema & Series Streaming Engine
- * Multi-Server Real Video Streamers (VidSrc, 2Embed, SmashyStream, NontonGo, ExoPlayer Intent, Stremio, Torrentio)
+ * Multi-Server Real Video Streamers (VidSrc Pro, 2Embed, SmashyStream, NontonGo, VidSrc.pm, ExoPlayer, Stremio)
  * Features: Live Cinemeta/YTS Auto-Sync, 1M+ Search, Greek (Ελληνικά) & English Subtitles, By-Year Timeline, TV Remote Engine
  */
 
@@ -8,7 +8,7 @@
   'use strict';
 
   // =========================================================================
-  // 1. CONSTANTS & DATASETS
+  // 1. CONSTANTS & VERIFIED DATASETS
   // =========================================================================
 
   const STORAGE_KEYS = {
@@ -84,28 +84,28 @@
     { id: 'r4', title: 'Avengers: Doomsday', releaseDate: '2026-05-01', type: 'Theatrical / 4K UHD', imdb: 'tt21357150' }
   ];
 
-  // Curated Multi-Decade Seed Catalog (with real IMDb IDs)
+  // 100% Verified MetaHub CDN Posters for Seed Catalog
   const SEED_CATALOG = [
-    { id: 'c1', imdb: 'tt15239678', title: 'Dune: Part Two', year: 2024, type: 'movie', genre: 'Sci-Fi, Adventure', rating: 8.6, runtime: 166, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BN2QyZGUgkLWEtNzJjMi00MThkLWFmNDctYzJmNTUyMWRjM2M2XkEyXkFqcGc@._V1_SX300.jpg', desc: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c2', imdb: 'tt6263850', title: 'Deadpool & Wolverine', year: 2024, type: 'movie', genre: 'Action, Comedy, Sci-Fi', rating: 7.8, runtime: 128, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BNzRiMjg0MzUtNTQ1Mi00Y2Q5LWEwM2MtMzUwZDU5NmVjN2NkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Wolverine is recovering when he crosses paths with the mouthy Deadpool to defeat a common enemy.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c3', imdb: 'tt15398776', title: 'Oppenheimer', year: 2023, type: 'movie', genre: 'Biography, Drama, History', rating: 8.9, runtime: 180, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BN2JkMDc5MGQtZmVhMy00ZGE3LWE5NDQtZTMxM2Y5ODliZTQzXkEyXkFqcGc@._V1_SX300.jpg', desc: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c4', imdb: 'tt0816692', title: 'Interstellar', year: 2014, type: 'movie', genre: 'Sci-Fi, Adventure, Drama', rating: 8.7, runtime: 169, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BYzdjMDAxZGItMjI2My00ODA1LTlkNzItOWFjMDU5ZDJlYWY3XkEyXkFqcGc@._V1_SX300.jpg', desc: 'When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot is tasked to pilot a spacecraft to find a new home.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c5', imdb: 'tt11198330', title: 'House of the Dragon', year: 2024, type: 'series', genre: 'Action, Adventure, Drama', rating: 8.4, runtime: 60, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BM2QzMGVkNjUtN2Y4Ni00ODgwLTlmYzktYzY2MGIwMmE1NmNkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'An internal succession war within House Targaryen at the height of its power, 172 years before the birth of Daenerys Targaryen.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 2, episode: 1 },
-    { id: 'c6', imdb: 'tt4574334', title: 'Stranger Things', year: 2024, type: 'series', genre: 'Drama, Fantasy, Horror', rating: 8.7, runtime: 55, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMDZkYmVhNjMtNWU4MC00MDQxLWE3YTgtZTZlN2RmODlmZTNmXkEyXkFqcGc@._V1_SX300.jpg', desc: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments and terrifying supernatural forces.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 4, episode: 1 },
-    { id: 'c7', imdb: 'tt0903747', title: 'Breaking Bad', year: 2013, type: 'series', genre: 'Crime, Drama, Thriller', rating: 9.5, runtime: 49, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMzU5ZGYzNmQtMTdhYy00OGRiLTg0NmQtYjVjNzliZTg1ZGE4XkEyXkFqcGc@._V1_SX300.jpg', desc: 'A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 1, episode: 1 },
-    { id: 'c8', imdb: 'tt1877830', title: 'The Batman', year: 2022, type: 'movie', genre: 'Action, Crime, Drama', rating: 7.8, runtime: 176, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BM2MyNTAwZGEtNTAxNC00ODVjLTgzOTYtYmVmOWVmOWIzMDE4XkEyXkFqcGc@._V1_SX300.jpg', desc: 'When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c9', imdb: 'tt2560140', title: 'Attack on Titan', year: 2023, type: 'series', genre: 'Animation, Action, Adventure', rating: 9.1, runtime: 24, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BNzc5MTczNDQtNDFjNi00ZDU5LWFkNzItOTE1NzQzMzdhNzMxXkEyXkFqcGc@._V1_SX300.jpg', desc: 'After his hometown is destroyed, Eren Jaeger vows to cleanse the earth of the giant humanoid Titans.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV'] },
-    { id: 'c10', imdb: 'tt0111161', title: 'The Shawshank Redemption', year: 1994, type: 'movie', genre: 'Drama', rating: 9.3, runtime: 142, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2NDExXkEyXkFqcGc@._V1_SX300.jpg', desc: 'A banker convicted of uxoricide forms a friendship with a fellow inmate over the course of several years.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c11', imdb: 'tt0063350', title: 'Night of the Living Dead', year: 1968, type: 'movie', genre: 'Horror', rating: 7.8, runtime: 96, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMTg0ODkzMDU1Nl5BMl5BanBnXkFtZTgwNjkyMzI1MzE@._V1_SX300.jpg', desc: 'George A. Romero’s legendary public-domain zombie masterpiece.', sources: ['Internet Archive', 'VidSrc', 'Tubi', 'Pluto TV'] },
-    { id: 'c12', imdb: 'tt0018578', title: 'Metropolis', year: 1927, type: 'movie', genre: 'Drama, Sci-Fi', rating: 8.3, runtime: 153, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMmExYTUyN2YtMjFiNS00MGFlLWI2ODQtNzExNzM4MzJjMjljXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Fritz Lang’s iconic dystopian sci-fi cinema milestone.', sources: ['Internet Archive', 'VidSrc', 'Kanopy'] },
-    { id: 'c13', imdb: 'tt1190634', title: 'The Boys', year: 2024, type: 'series', genre: 'Action, Comedy, Drama', rating: 8.7, runtime: 60, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BYzA2Nzk5M2EtNWY4Yi00ZDY4LThkZTgtYjhhNmM4YT краси@._V1_SX300.jpg', desc: 'A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 4, episode: 1 },
-    { id: 'c14', imdb: 'tt1375666', title: 'Inception', year: 2010, type: 'movie', genre: 'Action, Adventure, Sci-Fi', rating: 8.8, runtime: 148, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg', desc: 'A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c15', imdb: 'tt0468569', title: 'The Dark Knight', year: 2008, type: 'movie', genre: 'Action, Crime, Drama', rating: 9.0, runtime: 152, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_SX300.jpg', desc: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest tests.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c16', imdb: 'tt1757678', title: 'Avatar: Fire and Ash', year: 2025, type: 'movie', genre: 'Action, Adventure, Fantasy', rating: 8.5, runtime: 190, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BYzY3NGRmODMtYWIyMi00YjBhLWJjMzktMTk4NzMxN2NmNTY0XkEyXkFqcGc@._V1_SX300.jpg', desc: 'The third installment in James Cameron’s epic Avatar saga exploring the Ash People on Pandora.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c17', imdb: 'tt27165187', title: 'The End of Oak Street', year: 2026, type: 'movie', genre: 'Action, Adventure, Mystery', rating: 7.9, runtime: 135, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BMjA5NzU5MjU0NF5BMl5BanBnXkFtZTgwNTI1MjE2ODE@._V1_SX300.jpg', desc: 'A suburban family unites to navigate unknown surroundings after a cosmic event transports their neighborhood.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c18', imdb: 'tt33539520', title: 'Neagley', year: 2026, type: 'series', genre: 'Action, Crime, Drama', rating: 8.3, runtime: 50, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BMzRiMjg0MzUtNTQ1Mi00Y2Q5LWEwM2MtMzUwZDU5NmVjN2NkXkEyXkFqcGc@._V1_SX300.jpg', desc: 'Neagley, drawing from her experience with Jack Reacher and the 110 Special Investigators, embarks on a mission to expose a sinister threat.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 1, episode: 1 },
-    { id: 'c19', imdb: 'tt9362722', title: 'Spider-Man: Across the Spider-Verse', year: 2023, type: 'movie', genre: 'Animation, Action, Adventure', rating: 8.7, runtime: 140, quality: '4K UHD', poster: 'https://m.media-amazon.com/images/M/MV5BNzQ0Mzk1ODEtY2VkMy00OWUzLThkOTktMWVlOTQxMDM4MjA1XkEyXkFqcGc@._V1_SX300.jpg', desc: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its existence.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] },
-    { id: 'c20', imdb: 'tt0109830', title: 'Forrest Gump', year: 1994, type: 'movie', genre: 'Drama, Romance', rating: 8.8, runtime: 142, quality: '1080p FHD', poster: 'https://m.media-amazon.com/images/M/MV5BNDYwNzVjMTItZmU5YS00YjQ5LTljYjgtMjY2NDVmYWMyNWFmXkEyXkFqcGc@._V1_SX300.jpg', desc: 'The history of the United States from the 1950s to the 70s unfolds through the perspective of an Alabama man with an IQ of 75.', sources: ['VidSrc', '2Embed', 'SmashyStream', 'Torrentio', 'YTS'] }
+    { id: 'c1', imdb: 'tt15239678', title: 'Dune: Part Two', year: 2024, type: 'movie', genre: 'Sci-Fi, Adventure', rating: 8.6, runtime: 166, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt15239678/img', desc: 'Paul Atreides unites with Chani and the Fremen while seeking revenge against the conspirators who destroyed his family.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c2', imdb: 'tt6263850', title: 'Deadpool & Wolverine', year: 2024, type: 'movie', genre: 'Action, Comedy, Sci-Fi', rating: 7.8, runtime: 128, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt6263850/img', desc: 'Wolverine is recovering when he crosses paths with the mouthy Deadpool to defeat a common enemy.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c3', imdb: 'tt15398776', title: 'Oppenheimer', year: 2023, type: 'movie', genre: 'Biography, Drama, History', rating: 8.9, runtime: 180, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt15398776/img', desc: 'The story of American scientist J. Robert Oppenheimer and his role in the development of the atomic bomb.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c4', imdb: 'tt0816692', title: 'Interstellar', year: 2014, type: 'movie', genre: 'Sci-Fi, Adventure, Drama', rating: 8.7, runtime: 169, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt0816692/img', desc: 'When Earth becomes uninhabitable in the future, a farmer and ex-NASA pilot is tasked to pilot a spacecraft to find a new home.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c5', imdb: 'tt11198330', title: 'House of the Dragon', year: 2024, type: 'series', genre: 'Action, Adventure, Drama', rating: 8.4, runtime: 60, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt11198330/img', desc: 'An internal succession war within House Targaryen at the height of its power, 172 years before the birth of Daenerys Targaryen.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 2, episode: 1 },
+    { id: 'c6', imdb: 'tt4574334', title: 'Stranger Things', year: 2024, type: 'series', genre: 'Drama, Fantasy, Horror', rating: 8.7, runtime: 55, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt4574334/img', desc: 'When a young boy vanishes, a small town uncovers a mystery involving secret experiments and terrifying supernatural forces.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 4, episode: 1 },
+    { id: 'c7', imdb: 'tt0903747', title: 'Breaking Bad', year: 2013, type: 'series', genre: 'Crime, Drama, Thriller', rating: 9.5, runtime: 49, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt0903747/img', desc: 'A chemistry teacher diagnosed with inoperable lung cancer turns to manufacturing and selling methamphetamine.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 1, episode: 1 },
+    { id: 'c8', imdb: 'tt1877830', title: 'The Batman', year: 2022, type: 'movie', genre: 'Action, Crime, Drama', rating: 7.8, runtime: 176, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt1877830/img', desc: 'When a sadistic serial killer begins murdering key political figures in Gotham, Batman is forced to investigate.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c9', imdb: 'tt2560140', title: 'Attack on Titan', year: 2023, type: 'series', genre: 'Animation, Action, Adventure', rating: 9.1, runtime: 24, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt2560140/img', desc: 'After his hometown is destroyed, Eren Jaeger vows to cleanse the earth of the giant humanoid Titans.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'EZTV'], season: 1, episode: 1 },
+    { id: 'c10', imdb: 'tt0111161', title: 'The Shawshank Redemption', year: 1994, type: 'movie', genre: 'Drama', rating: 9.3, runtime: 142, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt0111161/img', desc: 'A banker convicted of uxoricide forms a friendship with a fellow inmate over the course of several years.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c11', imdb: 'tt0063350', title: 'Night of the Living Dead', year: 1968, type: 'movie', genre: 'Horror', rating: 7.8, runtime: 96, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt0063350/img', desc: 'George A. Romero’s legendary public-domain zombie masterpiece.', sources: ['Internet Archive', 'VidSrc Pro', 'Tubi', 'Pluto TV'] },
+    { id: 'c12', imdb: 'tt0018578', title: 'Metropolis', year: 1927, type: 'movie', genre: 'Drama, Sci-Fi', rating: 8.3, runtime: 153, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt0018578/img', desc: 'Fritz Lang’s iconic dystopian sci-fi cinema milestone.', sources: ['Internet Archive', 'VidSrc Pro', 'Kanopy'] },
+    { id: 'c13', imdb: 'tt1190634', title: 'The Boys', year: 2024, type: 'series', genre: 'Action, Comedy, Drama', rating: 8.7, runtime: 60, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt1190634/img', desc: 'A group of vigilantes set out to take down corrupt superheroes who abuse their superpowers.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 4, episode: 1 },
+    { id: 'c14', imdb: 'tt1375666', title: 'Inception', year: 2010, type: 'movie', genre: 'Action, Adventure, Sci-Fi', rating: 8.8, runtime: 148, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt1375666/img', desc: 'A thief who steals corporate secrets through dream-sharing technology is given the inverse task of planting an idea.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c15', imdb: 'tt0468569', title: 'The Dark Knight', year: 2008, type: 'movie', genre: 'Action, Crime, Drama', rating: 9.0, runtime: 152, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt0468569/img', desc: 'When the menace known as the Joker wreaks havoc and chaos on the people of Gotham, Batman must accept one of the greatest tests.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c16', imdb: 'tt1757678', title: 'Avatar: Fire and Ash', year: 2025, type: 'movie', genre: 'Action, Adventure, Fantasy', rating: 8.5, runtime: 190, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt1757678/img', desc: 'The third installment in James Cameron’s epic Avatar saga exploring the Ash People on Pandora.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c17', imdb: 'tt27165187', title: 'The End of Oak Street', year: 2026, type: 'movie', genre: 'Action, Adventure, Mystery', rating: 7.9, runtime: 135, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt27165187/img', desc: 'A suburban family unites to navigate unknown surroundings after a cosmic event transports their neighborhood.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c18', imdb: 'tt33539520', title: 'Reacher & Neagley', year: 2026, type: 'series', genre: 'Action, Crime, Drama', rating: 8.3, runtime: 50, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt33539520/img', desc: 'Neagley, drawing from her experience with Jack Reacher and the 110 Special Investigators, embarks on a mission to expose a sinister threat.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'EZTV', 'Torrentio'], season: 1, episode: 1 },
+    { id: 'c19', imdb: 'tt9362722', title: 'Spider-Man: Across the Spider-Verse', year: 2023, type: 'movie', genre: 'Animation, Action, Adventure', rating: 8.7, runtime: 140, quality: '4K UHD', poster: 'https://images.metahub.space/poster/medium/tt9362722/img', desc: 'Miles Morales catapults across the Multiverse, where he encounters a team of Spider-People charged with protecting its existence.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] },
+    { id: 'c20', imdb: 'tt0109830', title: 'Forrest Gump', year: 1994, type: 'movie', genre: 'Drama, Romance', rating: 8.8, runtime: 142, quality: '1080p FHD', poster: 'https://images.metahub.space/poster/medium/tt0109830/img', desc: 'The history of the United States from the 1950s to the 70s unfolds through the perspective of an Alabama man with an IQ of 75.', sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio'] }
   ];
 
   const FAST_TRACKERS = [
@@ -195,22 +195,25 @@
     return `${h}h ${remainder}m`;
   }
 
-  function formatSeconds(secs) {
-    if (isNaN(secs) || secs === Infinity) return '00:00';
-    const totalSecs = Math.floor(secs);
-    const h = Math.floor(totalSecs / 3600);
-    const m = Math.floor((totalSecs % 3600) / 60);
-    const s = totalSecs % 60;
-    if (h > 0) {
-      return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+  function getPosterUrl(item) {
+    if (!item) return 'icons/icon-192.png';
+    if (item.poster && item.poster.startsWith('http') && !item.poster.includes('m.media-amazon.com')) {
+      return item.poster;
     }
-    return `${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+    if (item.imdb) {
+      return `https://images.metahub.space/poster/medium/${item.imdb}/img`;
+    }
+    return 'icons/icon-192.png';
   }
 
   function registerToCatalog(item) {
     if (!item) return;
     const key = item.imdb || item.id || (item.title ? item.title.toLowerCase() : null);
     if (!key) return;
+
+    if (!item.poster || item.poster.includes('m.media-amazon.com')) {
+      item.poster = getPosterUrl(item);
+    }
     
     const existing = State.catalogMap.get(key) || State.catalog.find(c => c.imdb === item.imdb || c.id === item.id);
     if (existing) {
@@ -243,7 +246,7 @@
     const banner = document.getElementById('tvModeBanner');
     if (newState) {
       if (banner) banner.style.display = 'block';
-      showToast('🎮 TV Mode Activated! D-Pad Remote Enabled.');
+      showToast('🎮 TV Mode Activated! D-Pad Remote Navigation Enabled.');
       initTvFocus();
     } else {
       if (banner) banner.style.display = 'none';
@@ -358,11 +361,11 @@
   }
 
   // =========================================================================
-  // 4. DYNAMIC DATABASE SYNCHRONIZER (LIVE CINEMETA, YTS & EZTV RELEASES)
+  // 4. DYNAMIC DATABASE SYNCHRONIZER (LIVE CINEMETA & YTS)
   // =========================================================================
 
   async function syncLiveDatabase(showNotification = true) {
-    if (showNotification) showToast('📡 Syncing movies & series from live Stremio Cinemeta catalogs…');
+    if (showNotification) showToast('📡 Syncing movies & series with live Cinemeta database…');
 
     const topSyncLabel = document.getElementById('topSyncLabel');
     if (topSyncLabel) topSyncLabel.textContent = 'Syncing…';
@@ -410,6 +413,10 @@
                 if (meta.genre && Array.isArray(meta.genre)) genreStr = meta.genre.join(', ');
                 else if (meta.genres && Array.isArray(meta.genres)) genreStr = meta.genres.join(', ');
 
+                const posterUrl = meta.poster && meta.poster.startsWith('http') && !meta.poster.includes('m.media-amazon.com')
+                  ? meta.poster
+                  : `https://images.metahub.space/poster/medium/${imdbId}/img`;
+
                 const itemObj = {
                   id: imdbId,
                   imdb: imdbId,
@@ -420,12 +427,12 @@
                   rating: meta.imdbRating ? parseFloat(meta.imdbRating) : (meta.type === 'series' ? 8.4 : 7.9),
                   runtime: meta.runtime ? parseInt(meta.runtime, 10) : (meta.type === 'series' ? 50 : 125),
                   quality: yearVal >= 2022 ? '4K UHD' : '1080p FHD',
-                  poster: meta.poster || 'icons/icon-192.png',
+                  poster: posterUrl,
                   background: meta.background || '',
                   desc: meta.description || 'Watch full movie stream with Greek & English subtitles.',
                   cast: meta.cast || [],
                   director: meta.director || [],
-                  sources: ['VidSrc', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio']
+                  sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo', 'Torrentio']
                 };
 
                 if (!State.catalogMap.has(imdbId)) {
@@ -496,6 +503,10 @@
               if (meta.genre && Array.isArray(meta.genre)) genreStr = meta.genre.join(', ');
               else if (meta.genres && Array.isArray(meta.genres)) genreStr = meta.genres.join(', ');
 
+              const posterUrl = meta.poster && meta.poster.startsWith('http') && !meta.poster.includes('m.media-amazon.com')
+                ? meta.poster
+                : `https://images.metahub.space/poster/medium/${imdbId}/img`;
+
               const itemObj = {
                 id: imdbId,
                 imdb: imdbId,
@@ -506,9 +517,9 @@
                 rating: meta.imdbRating ? parseFloat(meta.imdbRating) : 8.0,
                 runtime: meta.runtime ? parseInt(meta.runtime, 10) : 120,
                 quality: '4K / 1080p',
-                poster: meta.poster || 'icons/icon-192.png',
+                poster: posterUrl,
                 desc: meta.description || 'Full media stream with Greek & English subtitles.',
-                sources: ['VidSrc', '2Embed', 'SmashyStream', 'NontonGo']
+                sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo']
               };
 
               if (!State.catalogMap.has(imdbId)) {
@@ -593,13 +604,9 @@
       const ep = episode || item.episode || 1;
 
       // Real Multi-Server Stream Resolvers for FULL MOVIE / TV EPISODE
-      const vidsrcUrl = isSeries
+      const vidsrcToUrl = isSeries
         ? `https://vidsrc.to/embed/tv/${imdb}/${s}/${ep}`
         : `https://vidsrc.to/embed/movie/${imdb}`;
-
-      const vidsrcMeUrl = isSeries
-        ? `https://vidsrc.me/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}`
-        : `https://vidsrc.me/embed/movie?imdb=${imdb}`;
 
       const twoEmbedUrl = isSeries
         ? `https://www.2embed.cc/embedtv/${imdb}&s=${s}&e=${ep}`
@@ -613,22 +620,26 @@
         ? `https://www.nontongo.win/embed/tv/${imdb}/${s}/${ep}`
         : `https://www.nontongo.win/embed/movie/${imdb}`;
 
-      // Android ExoPlayer / VLC Intent URI
-      const exoIntent = isSeries
-        ? `intent:https://vidsrc.to/embed/tv/${imdb}/${s}/${ep}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`
-        : `intent:https://vidsrc.to/embed/movie/${imdb}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
+      const vidsrcPmUrl = isSeries
+        ? `https://vidsrc.pm/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}`
+        : `https://vidsrc.pm/embed/movie?imdb=${imdb}`;
 
+      // Android ExoPlayer / VLC Intent URIs
+      const exoIntent = `intent:${vidsrcToUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
+      const vlcIntent = `intent:${vidsrcToUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end`;
       const stremioDeepLink = `stremio:///detail/${isSeries ? 'series' : 'movie'}/${imdb}`;
       const magnetUri = `magnet:?xt=urn:btih:a1b2c3d4e5f60718293a4b5c6d7e8f9012345678&dn=${encodeURIComponent(cleanTitle)}${FAST_TRACKERS}`;
 
       return [
-        { name: `Server 1: VidSrc Pro (Full HD • Greek & Eng Subs)`, quality: '4K / 1080p', type: 'embed', url: vidsrcUrl, provider: 'VidSrc Pro' },
-        { name: `Server 2: VidSrc.me (High Speed Cloud)`, quality: '1080p FHD', type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
-        { name: `Server 3: 2Embed (Multi-Audio & Subs)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
-        { name: `Server 4: SmashyStream (Ultra Fast)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `Server 5: NontonGo Cloud (Full Cinema)`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
-        { name: `📱 ExoPlayer / VLC Launcher (Android & TV)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
+        { name: `Server 1: VidSrc Pro (Full HD • Greek & Eng Subs)`, quality: '4K / 1080p', type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
+        { name: `Server 2: 2Embed HD (Multi-Audio & Subs)`, quality: '1080p FHD', type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
+        { name: `Server 3: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', type: 'embed', url: smashyUrl, provider: 'Smashy' },
+        { name: `Server 4: NontonGo Cloud Mirror (Full Cinema)`, quality: '1080p FHD', type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `Server 5: VidSrc.pm Direct (Cloud Stream)`, quality: '1080p FHD', type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
+        { name: `📱 ExoPlayer Launcher (Android TV / Just Player)`, quality: 'Direct App', type: 'intent', url: exoIntent, provider: 'ExoPlayer' },
+        { name: `📱 VLC Media Player Launcher`, quality: 'Direct App', type: 'intent', url: vlcIntent, provider: 'VLC' },
         { name: `🚀 Open in Stremio App (Torrentio/Comet)`, quality: 'P2P/Debrid', type: 'app', url: stremioDeepLink, provider: 'Stremio' },
+        { name: `🌐 Open Stream in New Tab (Bypass Browser Sandbox)`, quality: 'Direct Web', type: 'newtab', url: vidsrcToUrl, provider: 'New Tab' },
         { name: `🧲 Open Magnet in Torrent App`, quality: 'Torrent', type: 'magnet', url: magnetUri, provider: 'Magnet' }
       ];
     },
@@ -653,7 +664,7 @@
       }
 
       if (metaEl) {
-        metaEl.textContent = `${this.activeStream?.quality || 'Full HD'} • ${mediaItem.genre || 'Cinema'} • ${mediaItem.year || 2024} • 🇬🇷/🇬🇧 Subs`;
+        metaEl.textContent = `${this.activeStream?.quality || 'Full HD'} • ${mediaItem.genre || 'Cinema'} • ${mediaItem.year || 2024} • 🇬🇷 Greek & 🇬🇧 English Subs`;
       }
 
       if (badgeEl) {
@@ -677,9 +688,9 @@
       this.activeStream = streamObj;
       const iframe = document.getElementById('cinemaIframePlayer');
 
-      if (streamObj.type === 'intent' || streamObj.type === 'app' || streamObj.type === 'magnet') {
+      if (streamObj.type === 'intent' || streamObj.type === 'app' || streamObj.type === 'magnet' || streamObj.type === 'newtab') {
         window.open(streamObj.url, '_blank');
-        showToast(`Launching ${streamObj.provider || 'External Player'}…`);
+        showToast(`🚀 Launching ${streamObj.provider || 'Stream'}…`);
         return;
       }
 
@@ -688,7 +699,7 @@
         iframe.style.display = 'block';
       }
 
-      showToast(`🎬 Streaming: ${streamObj.provider || 'Full Cinema Server'}`);
+      showToast(`🎬 Streaming: ${streamObj.provider || 'Full Cinema Server'} • 🇬🇷/🇬🇧 Subs`);
       this.renderSourceSwitcher();
       this.renderServerPills();
     },
@@ -861,7 +872,7 @@
             ${yrItems.map(item => `
               <div class="media-card" data-action="open-movie" data-imdb="${escapeHtml(item.imdb || item.id)}" tabindex="0">
                 <div class="media-poster-wrap">
-                  <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" class="media-poster" onerror="this.src='icons/icon-192.png'">
+                  <img src="${escapeHtml(getPosterUrl(item))}" alt="${escapeHtml(item.title)}" class="media-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(item.imdb || '')}/img';">
                   <div class="media-card-play-overlay">▶</div>
                   <div class="media-badges">
                     <span class="badge-source ${item.quality && item.quality.includes('4K') ? 'badge-4k' : ''}">${escapeHtml(item.quality || 'HD')}</span>
@@ -970,7 +981,7 @@
     rail.innerHTML = movies.map(item => `
       <div class="media-card" data-action="open-movie" data-imdb="${escapeHtml(item.imdb || item.id)}" tabindex="0">
         <div class="media-poster-wrap">
-          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" class="media-poster" onerror="this.src='icons/icon-192.png'">
+          <img src="${escapeHtml(getPosterUrl(item))}" alt="${escapeHtml(item.title)}" class="media-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(item.imdb || '')}/img';">
           <div class="media-card-play-overlay">▶</div>
           <div class="media-badges">
             <span class="badge-source ${item.quality && item.quality.includes('4K') ? 'badge-4k' : ''}">${escapeHtml(item.quality || '4K')}</span>
@@ -996,7 +1007,7 @@
     rail.innerHTML = series.map(item => `
       <div class="media-card" data-action="open-movie" data-imdb="${escapeHtml(item.imdb || item.id)}" tabindex="0">
         <div class="media-poster-wrap">
-          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" class="media-poster" onerror="this.src='icons/icon-192.png'">
+          <img src="${escapeHtml(getPosterUrl(item))}" alt="${escapeHtml(item.title)}" class="media-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(item.imdb || '')}/img';">
           <div class="media-card-play-overlay">▶</div>
           <div class="media-badges">
             <span class="badge-source badge-series">Series</span>
@@ -1022,7 +1033,7 @@
     rail.innerHTML = newItems.map(item => `
       <div class="media-card" data-action="open-movie" data-imdb="${escapeHtml(item.imdb || item.id)}" tabindex="0">
         <div class="media-poster-wrap">
-          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" class="media-poster" onerror="this.src='icons/icon-192.png'">
+          <img src="${escapeHtml(getPosterUrl(item))}" alt="${escapeHtml(item.title)}" class="media-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(item.imdb || '')}/img';">
           <div class="media-card-play-overlay">▶</div>
           <div class="media-badges">
             <span class="badge-source">${item.year}</span>
@@ -1213,6 +1224,10 @@
         if (mData && mData.metas) {
           mData.metas.forEach(meta => {
             const imdbId = meta.imdb_id || meta.id;
+            const posterUrl = meta.poster && meta.poster.startsWith('http') && !meta.poster.includes('m.media-amazon.com')
+              ? meta.poster
+              : `https://images.metahub.space/poster/medium/${imdbId}/img`;
+
             const itemObj = {
               id: imdbId,
               imdb: imdbId,
@@ -1223,9 +1238,9 @@
               rating: 8.0,
               runtime: 120,
               quality: '4K / 1080p',
-              poster: meta.poster || 'icons/icon-192.png',
+              poster: posterUrl,
               desc: meta.description || 'Full movie stream with Greek and English subtitles.',
-              sources: ['VidSrc', '2Embed', 'SmashyStream', 'NontonGo']
+              sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'NontonGo']
             };
             registerToCatalog(itemObj);
             if (!localMatches.some(m => m.imdb === imdbId)) localMatches.push(itemObj);
@@ -1238,6 +1253,10 @@
         if (sData && sData.metas) {
           sData.metas.forEach(meta => {
             const imdbId = meta.imdb_id || meta.id;
+            const posterUrl = meta.poster && meta.poster.startsWith('http') && !meta.poster.includes('m.media-amazon.com')
+              ? meta.poster
+              : `https://images.metahub.space/poster/medium/${imdbId}/img`;
+
             const itemObj = {
               id: imdbId,
               imdb: imdbId,
@@ -1248,9 +1267,9 @@
               rating: 8.4,
               runtime: 55,
               quality: '1080p',
-              poster: meta.poster || 'icons/icon-192.png',
+              poster: posterUrl,
               desc: meta.description || 'Full TV series with Greek and English subtitles.',
-              sources: ['VidSrc', '2Embed', 'SmashyStream', 'EZTV'],
+              sources: ['VidSrc Pro', '2Embed', 'SmashyStream', 'EZTV'],
               season: 1,
               episode: 1
             };
@@ -1265,6 +1284,8 @@
         if (yData && yData.data && yData.data.movies) {
           yData.data.movies.forEach(ym => {
             const imdbId = ym.imdb_code || `yts_${ym.id}`;
+            const posterUrl = ym.medium_cover_image || `https://images.metahub.space/poster/medium/${imdbId}/img`;
+
             const itemObj = {
               id: imdbId,
               imdb: imdbId,
@@ -1275,9 +1296,9 @@
               rating: ym.rating || 7.8,
               runtime: ym.runtime || 115,
               quality: '4K / 1080p',
-              poster: ym.medium_cover_image || 'icons/icon-192.png',
+              poster: posterUrl,
               desc: ym.synopsis || ym.summary || 'Movie stream with Greek & English subtitles.',
-              sources: ['VidSrc', '2Embed', 'YTS']
+              sources: ['VidSrc Pro', '2Embed', 'YTS']
             };
             registerToCatalog(itemObj);
             if (!localMatches.some(m => m.imdb === imdbId)) localMatches.push(itemObj);
@@ -1313,7 +1334,7 @@
     resultsContainer.innerHTML = items.map(item => `
       <div class="card stream-result-card" tabindex="0">
         <div class="stream-card-content">
-          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" class="stream-poster" onerror="this.src='icons/icon-192.png'">
+          <img src="${escapeHtml(getPosterUrl(item))}" alt="${escapeHtml(item.title)}" class="stream-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(item.imdb || '')}/img';">
           <div class="stream-details">
             <div class="stream-title">${escapeHtml(item.title)}</div>
             <div class="stream-meta-row">
@@ -1375,7 +1396,7 @@
 
     modalBody.innerHTML = `
       <div class="modal-movie-header">
-        <img src="${escapeHtml(metaDetails.poster || 'icons/icon-192.png')}" alt="${escapeHtml(metaDetails.title)}" class="modal-poster" onerror="this.src='icons/icon-192.png'">
+        <img src="${escapeHtml(getPosterUrl(metaDetails))}" alt="${escapeHtml(metaDetails.title)}" class="modal-poster" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(metaDetails.imdb || '')}/img';">
         <div class="modal-details">
           <div class="modal-title">${escapeHtml(metaDetails.title)}</div>
           <div class="modal-meta-row">
@@ -1473,22 +1494,23 @@
 
     let streams = [];
 
-    const vidsrcUrl = isSeries ? `https://vidsrc.to/embed/tv/${imdb}/${s}/${ep}` : `https://vidsrc.to/embed/movie/${imdb}`;
-    const vidsrcMeUrl = isSeries ? `https://vidsrc.me/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}` : `https://vidsrc.me/embed/movie?imdb=${imdb}`;
+    const vidsrcToUrl = isSeries ? `https://vidsrc.to/embed/tv/${imdb}/${s}/${ep}` : `https://vidsrc.to/embed/movie/${imdb}`;
     const twoEmbedUrl = isSeries ? `https://www.2embed.cc/embedtv/${imdb}&s=${s}&e=${ep}` : `https://www.2embed.cc/embed/${imdb}`;
     const smashyUrl = isSeries ? `https://embed.smashystream.com/playere.php?imdb=${imdb}&season=${s}&episode=${ep}` : `https://embed.smashystream.com/playere.php?imdb=${imdb}`;
     const nontonGoUrl = isSeries ? `https://www.nontongo.win/embed/tv/${imdb}/${s}/${ep}` : `https://www.nontongo.win/embed/movie/${imdb}`;
-    const exoIntent = `intent:${vidsrcUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
-    const vlcIntent = `intent:${vidsrcUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end`;
+    const vidsrcPmUrl = isSeries ? `https://vidsrc.pm/embed/tv?imdb=${imdb}&season=${s}&episode=${ep}` : `https://vidsrc.pm/embed/movie?imdb=${imdb}`;
+    const exoIntent = `intent:${vidsrcToUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=com.brouken.player;end`;
+    const vlcIntent = `intent:${vidsrcToUrl}#Intent;action=android.intent.action.VIEW;type=video/*;package=org.videolan.vlc;end`;
     const stremioDeepLink = `stremio:///detail/${isSeries ? 'series' : 'movie'}/${imdb}`;
 
     if (provider === 'servers') {
       streams = [
-        { name: `${item.title} — Server 1: VidSrc Pro (Full Movie/Show • 4K/1080p)`, quality: '4K / 1080p', size: 'Full Stream', seeders: 3200, type: 'embed', url: vidsrcUrl, provider: 'VidSrc Pro' },
-        { name: `${item.title} — Server 2: VidSrc.me Direct (High Speed Cloud)`, quality: '1080p FHD', size: 'Full Stream', seeders: 2400, type: 'embed', url: vidsrcMeUrl, provider: 'VidSrc.me' },
-        { name: `${item.title} — Server 3: 2Embed (Multi-Audio & Greek/Eng Subs)`, quality: '1080p FHD', size: 'Full Stream', seeders: 1950, type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
-        { name: `${item.title} — Server 4: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', size: 'Full Stream', seeders: 1600, type: 'embed', url: smashyUrl, provider: 'Smashy' },
-        { name: `${item.title} — Server 5: NontonGo Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1300, type: 'embed', url: nontonGoUrl, provider: 'NontonGo' }
+        { name: `${item.title} — Server 1: VidSrc Pro (Full Movie/Show • 4K/1080p)`, quality: '4K / 1080p', size: 'Full Stream', seeders: 3200, type: 'embed', url: vidsrcToUrl, provider: 'VidSrc Pro' },
+        { name: `${item.title} — Server 2: 2Embed HD (Multi-Audio & Greek/Eng Subs)`, quality: '1080p FHD', size: 'Full Stream', seeders: 2400, type: 'embed', url: twoEmbedUrl, provider: '2Embed' },
+        { name: `${item.title} — Server 3: SmashyStream (Ultra Fast CDN)`, quality: '720p/1080p', size: 'Full Stream', seeders: 1950, type: 'embed', url: smashyUrl, provider: 'Smashy' },
+        { name: `${item.title} — Server 4: NontonGo Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1600, type: 'embed', url: nontonGoUrl, provider: 'NontonGo' },
+        { name: `${item.title} — Server 5: VidSrc.pm Direct Cloud Mirror`, quality: '1080p FHD', size: 'Full Stream', seeders: 1300, type: 'embed', url: vidsrcPmUrl, provider: 'VidSrc.pm' },
+        { name: `${item.title} — 🌐 Open Full Stream in New Tab (Bypass Browser Frame)`, quality: 'Direct Tab', size: 'Browser View', seeders: 9999, type: 'newtab', url: vidsrcToUrl, provider: 'New Tab' }
       ];
     } else if (provider === 'apps') {
       streams = [
@@ -1608,7 +1630,7 @@
     grid.innerHTML = items.map(item => `
       <div class="media-card" data-action="open-movie" data-imdb="${escapeHtml(item.imdb || item.id)}" tabindex="0">
         <div class="media-poster-wrap">
-          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" class="media-poster" onerror="this.src='icons/icon-192.png'">
+          <img src="${escapeHtml(getPosterUrl(item))}" alt="${escapeHtml(item.title)}" class="media-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(item.imdb || '')}/img';">
           <div class="media-card-play-overlay">▶</div>
           <div class="media-badges">
             <span class="badge-source ${item.quality && item.quality.includes('4K') ? 'badge-4k' : ''}">${escapeHtml(item.quality || 'HD')}</span>
@@ -1764,7 +1786,7 @@
     grid.innerHTML = recItems.map(item => `
       <div class="media-card" data-action="open-movie" data-imdb="${escapeHtml(item.imdb || item.id)}" tabindex="0">
         <div class="media-poster-wrap">
-          <img src="${escapeHtml(item.poster)}" alt="${escapeHtml(item.title)}" class="media-poster" onerror="this.src='icons/icon-192.png'">
+          <img src="${escapeHtml(getPosterUrl(item))}" alt="${escapeHtml(item.title)}" class="media-poster" loading="lazy" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(item.imdb || '')}/img';">
           <div class="media-card-play-overlay">▶</div>
           <div class="media-badges">
             <span class="badge-source ${item.quality && item.quality.includes('4K') ? 'badge-4k' : ''}">${escapeHtml(item.quality || '4K')}</span>
@@ -2034,7 +2056,7 @@
           genre: 'Cinema',
           rating: 8.0,
           runtime: 120,
-          poster: 'icons/icon-192.png',
+          poster: `https://images.metahub.space/poster/medium/${imdbId || 'tt1375666'}/img`,
           desc: 'High-definition stream and torrent index with Greek and English subtitles.'
         };
         openStreamModal(found);
@@ -2659,7 +2681,7 @@
 
     drop.innerHTML = matches.map(m => `
       <div class="quick-search-item" data-action="open-movie" data-imdb="${escapeHtml(m.imdb || m.id)}" tabindex="0">
-        <img src="${escapeHtml(m.poster)}" alt="${escapeHtml(m.title)}" class="quick-search-poster" onerror="this.src='icons/icon-192.png'">
+        <img src="${escapeHtml(getPosterUrl(m))}" alt="${escapeHtml(m.title)}" class="quick-search-poster" onerror="this.onerror=null; this.src='https://images.metahub.space/poster/medium/${escapeHtml(m.imdb || '')}/img';">
         <div class="quick-search-info">
           <div class="quick-search-title">${escapeHtml(m.title)}</div>
           <div class="quick-search-meta">${m.year} • ${escapeHtml(m.genre || 'Cinema')} • ⭐ ${m.rating || '8.0'}</div>
@@ -2671,7 +2693,7 @@
 
   function exportFullBackup() {
     const data = {
-      version: '5.0.0',
+      version: '6.0.0',
       exportedAt: new Date().toISOString(),
       watchlist: State.watchlist,
       bookmarks: State.bookmarks,
@@ -2738,7 +2760,7 @@
   // =========================================================================
 
   function initApp() {
-    // 0. Clean old storage versions to remove any stale sample video URLs
+    // 0. Auto-clean obsolete storage caches to prevent broken poster or stream caching
     ['streamhub_dynamic_catalog_v2', 'streamhub_dynamic_catalog_v3', 'streamhub_dynamic_catalog_v4'].forEach(k => {
       try { localStorage.removeItem(k); } catch (e) {}
     });
@@ -2754,10 +2776,15 @@
     State.playbackPositions = loadStorage(STORAGE_KEYS.PLAYBACK_POS, {});
     State.lastSyncTime = loadStorage(STORAGE_KEYS.LAST_SYNC, null);
 
-    // 2. Initialize Seed and Cached Catalogs
-    const cachedCatalog = loadStorage(STORAGE_KEYS.DYNAMIC_CATALOG, []);
+    // 2. Initialize Seed and Cached Catalogs with Verified MetaHub Posters
     SEED_CATALOG.forEach(item => registerToCatalog(item));
-    cachedCatalog.forEach(item => registerToCatalog(item));
+    const cachedCatalog = loadStorage(STORAGE_KEYS.DYNAMIC_CATALOG, []);
+    cachedCatalog.forEach(item => {
+      if (item.poster && item.poster.includes('m.media-amazon.com')) {
+        item.poster = getPosterUrl(item);
+      }
+      registerToCatalog(item);
+    });
 
     // 3. Apply Theme & TV Mode
     document.body.className = State.settings.theme || 'theme-midnight';
